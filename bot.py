@@ -32,12 +32,18 @@ def start(update, context):
 
 def get_current_sync_status(update, context):
     msg = requests.get('http://95.217.134.179/sync_stats_all').json()
-    update.message.reply_text(msg)
+    amount = int(msg['amount'])
+    stats = msg['stats']
+    update.message.reply_text('Currently ' + str(amount) + ' assetchains are syncing')
+    if amount > 0:
+        for k,v in stats.items():
+            update.message.reply_text('{}- sync: {}. Blocks {} out of {}'.format(v['coin'], v['synced'], v['blocks'], v['longestchain']))
+
 
 
 def setup_binary(update, context):
     """Send a message when the command /start_sync is issued."""
-    link = context.args
+    link = {'link' : context.args[0]}
     msg = requests.post('http://95.217.134.179/upload_binary', data=link).json()
     update.message.reply_text(msg)
 
@@ -45,10 +51,9 @@ def setup_binary(update, context):
 
 def start_sync(update, context):
     """Send a message when the command /start_sync is issued."""
-
     for ticker in context.args:
         msg = requests.get('http://95.217.134.179/sync_start/{}'.format(ticker)).json()
-    update.message.reply_text(msg)
+        update.message.reply_text(msg)
 
 
 def stop_sync(update, context):
@@ -56,7 +61,7 @@ def stop_sync(update, context):
 
     for ticker in context.args:
         msg = requests.get('http://95.217.134.179/sync_stop/{}'.format(ticker)).json()
-    update.message.reply_text(msg)
+        update.message.reply_text(msg)
 
 
 def start_sync_all(update, context):
@@ -71,6 +76,7 @@ def stop_sync_all(update, context):
 
     msg = requests.get('http://95.217.134.179/sync_stop_all').json()
     update.message.reply_text(msg)
+    update.message.reply_text('waiting 30 seconds for cleanup of assetchain folders')
     time.sleep(30)
     msg = requests.get('http://95.217.134.179/clean_assetchain_folders').json()
     update.message.reply_text(msg)
