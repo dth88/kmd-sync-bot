@@ -1,17 +1,52 @@
 #!/usr/bin/env python3
-
 import logging
 import requests
-import subprocess
 import time
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+from functools import wraps
+from telegram import ReplyKeyboardMarkup
+from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
+                          ConversationHandler, DictPersistence)
+
+
+CONFIGURE, CHOOSING_SERVER, ISSUING_COMMANDS = range(3)
+
+
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+configure_keyboard = [['server_name', 'ipaddr'],
+                      ['root_pass', 'all_together']]
+reply_markup = ReplyKeyboardMarkup(configure_keyboard, one_time_keyboard=True)
 
 
 def main():
-    updater = Updater("971322549:AAHwgjKp-_i4qbimcSAenYpD_I8CI87uClk", use_context=True)
-    logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                     level=logging.INFO)
+    bot_persistence = DictPersistence()
+    updater = Updater("971322549:AAHwgjKp-_i4qbimcSAenYpD_I8CI87uClk", persistence=bot_persistence, use_context=True)
     dp = updater.dispatcher
+
+
+    conv_handler = ConversationHandler(
+        entry_points=[CommandHandler('start', start)],
+        states={
+            CONFIGURE: [MessageHandler(Filters.regex('^(server_name)$'), configure_name),
+                        MessageHandler(Filters.regex('^(ipaddr)$'), configure_ip),
+                        MessageHandler(Filters.regex('^(root_pass)$'), configure_root_pass),
+                        MessageHandler(Filters.regex('^(all_together)$'), configure)],
+
+            CHOOSING_SERVER: [MessageHandler(Filters.text, make_a_choice)],
+
+            ISSUING_COMMANDS: [MessageHandler(Filters.text, received_information),],
+        },
+
+        fallbacks=[MessageHandler(Filters.regex('^Done$'), done)]
+    )
+
+    dp.add_handler(conv_handler)
+    dp.add_error_handler(error)
+
+
+
+
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("start_sync", start_sync))
     dp.add_handler(CommandHandler("start_sync_all", start_sync_all))
@@ -26,27 +61,59 @@ def main():
 
 
 def start(update, context):
-    """Send a message when the command /start is issued."""
-    update.message.reply_text('Hi!')
+    update.message.reply_text('Hi! Lets configure a new sync server!')
+    context.user_data['servers'] = {}
+
+
+    return CONFIGURE
+
+
+def configure_name(update, context):
+    update.message.reply_text('Name your new sync-api server:')
+    context.user_data['servers']['name'] = 
+
+
+    return CONFIGURE
+
+
+def configure_ip(update, context):
+    update.message.reply_text('Please provide ip address of the server:')
+
+
+    return CONFIGURE
+
+
+def configure_root_pass(update, context):
+    update.message.reply_text('And the root passsword please:')
+
+
+    return CHOOSING_SERVER
+
+
+def make_a_choice(update, context):
+    update.message.reply_text('And the root passsword please:')
+
+
+    return ISSUING_COMMANDS
 
 
 def get_current_sync_status(update, context):
     msg = requests.get('http://95.217.134.179/sync_stats_all').json()
     amount = int(msg['amount'])
     stats = msg['stats']
-    update.message.reply_text('Currently ' + str(amount) + ' assetchains are syncing')
-    if amount > 0:
+    reply = 'Currently ' + str(amount) + ' assetchains are syncing\n'
+    if amount:
         for k,v in stats.items():
-            update.message.reply_text('{}- sync: {}. Blocks {} out of {}'.format(v['coin'], v['synced'], v['blocks'], v['longestchain']))
-
+            reply += '{}- sync: {}. Blocks {} out of {}\n'.format(v['coin'], v['synced'], v['blocks'], v['longestchain'])
+    
+    update.message.reply_text(reply)
 
 
 def setup_binary(update, context):
     """Send a message when the command /start_sync is issued."""
     link = {'link' : context.args[0]}
-    msg = requests.post('http://95.217.134.179/upload_binary', data=link).json()
+    msg = requests.post('http://{}/upload_binary'.format(), data=link).json()
     update.message.reply_text(msg)
-
 
 
 def start_sync(update, context):
@@ -82,11 +149,33 @@ def stop_sync_all(update, context):
     update.message.reply_text(msg)
 
 
-
-
 def help(update, context):
     """Send a message when the command /help is issued."""
-    update.message.reply_text('Help!')
+    help_msg  = 'Configuration:\n'
+    help_msg += '/configure - setup a new server.\n'
+    help_msg += '/show_available_servers - list available servers.\n'
+    help_msg += '/choose_server 1 - select server to execute commands on.\n'
+    help_msg += '/setup_binary - upload a new binary to the server.\n'
+    help_msg += '           \n'
+    help_msg += 'Routine cmds:\n'
+    help_msg += '/start_sync_all - start all tickers without KMD.\n'
+    help_msg += '/start_sync KMD AXO BET - start tickers individually.\n'
+    help_msg += '/stop_sync_all - stop all tickers (will stop them, wait for the processes to close for 30s and then do cleanup of assetchain folders).\n'
+    help_msg += '/stop_sync KMD AXO BET - stop tickers individually without cleanup.\n'
+    help_msg += '/get_current_sync_status - dump sync progress on all initialized tickers.\n'
+
+    update.message.reply_text(help_msg)
+
+
+def send_typing_action(func):
+    """Sends typing action while processing func command."""
+
+    @wraps(func)
+    def command_func(update, context, *args, **kwargs):
+        context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=ChatAction.TYPING)
+        return func(update, context,  *args, **kwargs)
+
+    return command_func
 
 
 
