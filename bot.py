@@ -9,7 +9,7 @@ from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
 
 
 #states
-CONFIGURE, CHOOSING_SERVER, ISSUING_COMMANDS = range(3)
+CONFIGURE, CHOOSING_SERVER, ISSUING_API_COMMANDS = range(3)
 
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -37,10 +37,10 @@ def main():
 
             CHOOSING_SERVER: [MessageHandler(Filters.text, make_a_choice)],
 
-            ISSUING_COMMANDS: [MessageHandler(Filters.text, received_information),],
+            ISSUING_API_COMMANDS: [MessageHandler(Filters.text, received_information),],
         },
 
-        fallbacks=[MessageHandler(Filters.regex('^Done$'), done)]
+        fallbacks=[MessageHandler(Filters.regex('^fallback$'), donedidodonedone)]
     )
 
     dp.add_handler(conv_handler)
@@ -115,7 +115,7 @@ def configure(update, context):
     new_server = context.user_data['new_server']
     #first setup and if success then add to the 'servers'
     context.user_data['servers'].append(new_server)
-    
+
 
     return CHOOSING_SERVER
 
@@ -129,7 +129,7 @@ def make_a_choice(update, context):
         update.message.reply_text('')
 
 
-    return ISSUING_COMMANDS
+    return ISSUING_API_COMMANDS
 
 
 @send_typing_action
