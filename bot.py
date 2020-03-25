@@ -61,38 +61,52 @@ def main():
 
 
 def start(update, context):
-    update.message.reply_text('Hi! Lets configure a new sync server!')
-    context.user_data['servers'] = {}
+    update.message.reply_text('Hi! Lets configure a new sync server!', reply_markup=configure_keyboard)
+    try:
+        if context.user_data['servers']:
+            pass
+    except KeyError:
+        context.user_data['servers'] = []
+    context.user_date['new_server'] = {}
 
 
     return CONFIGURE
 
 
 def configure_name(update, context):
-    update.message.reply_text('Name your new sync-api server:')
-    context.user_data['servers']['name'] = 
+    update.message.reply_text('Name your new sync-api server:', reply_markup=configure_keyboard)
+    context.user_data['new_server']['name'] = update.message.text
 
 
     return CONFIGURE
 
 
 def configure_ip(update, context):
-    update.message.reply_text('Please provide ip address of the server:')
+    update.message.reply_text('Please provide ip address of the server:', reply_markup=configure_keyboard)
+    context.user_data['new_server']['ip'] = update.message.text
 
 
     return CONFIGURE
 
 
 def configure_root_pass(update, context):
-    update.message.reply_text('And the root passsword please:')
+    update.message.reply_text('Now, root passsword please:', reply_markup=configure_keyboard)
+    context.user_data['new_server'] += '{}:'.format(update.message.text)
 
 
     return CHOOSING_SERVER
 
 
+def configure(update, context):
+    update.message.reply_text('format: name,ip,rootpassword')
+
+
+
+
+
 def make_a_choice(update, context):
     update.message.reply_text('And the root passsword please:')
-
+    
 
     return ISSUING_COMMANDS
 
