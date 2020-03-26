@@ -22,7 +22,7 @@ configure_markup = ReplyKeyboardMarkup(configure_keyboard, one_time_keyboard=Tru
 api_calls_keyboard = [['Setup binary', 'Server info'],
                       ['Start all', 'Stop all', 'Get status'],
                       ['Pick another server']]
-configure_markup = ReplyKeyboardMarkup(api_calls_keyboard, one_time_keyboard=True)
+api_calls_markup = ReplyKeyboardMarkup(api_calls_keyboard, one_time_keyboard=True)
 
 
 def main():
@@ -196,7 +196,7 @@ def setup_binary(update, context):
     """Send a message when the command /start_sync is issued."""
     link = {'link' : context.args[0]}
     msg = requests.post('http://{}/upload_binary'.format(), data=link).json()
-    update.message.reply_text(msg)
+    update.message.reply_text(msg, reply_markup=api_calls_markup)
 
     return TYPING_API_CALL
 
@@ -213,7 +213,7 @@ def get_current_sync_status(update, context):
         for k,v in stats.items():
             reply += '{}- sync: {}. Blocks {} out of {}\n'.format(v['coin'], v['synced'], v['blocks'], v['longestchain'])
     
-    update.message.reply_text(reply)
+    update.message.reply_text(reply, reply_markup=api_calls_markup)
 
 
     return TYPING_API_CALL
@@ -224,7 +224,7 @@ def start_sync(update, context):
     """Send a message when the command /start_sync is issued."""
     for ticker in context.args:
         msg = requests.get('http://{}/sync_start/{}'.format(context.user_data['choice']['ip'], ticker)).json()
-        update.message.reply_text(msg)
+        update.message.reply_text(msg, reply_markup=api_calls_markup)
 
     return TYPING_API_CALL
 
@@ -235,7 +235,7 @@ def stop_sync(update, context):
 
     for ticker in context.args:
         msg = requests.get('http://{}/sync_stop/{}'.format(context.user_data['choice']['ip'], ticker)).json()
-        update.message.reply_text(msg)
+        update.message.reply_text(msg, reply_markup=api_calls_markup)
 
     return TYPING_API_CALL
 
@@ -245,7 +245,7 @@ def start_sync_all(update, context):
     """Send a message when the command /start_sync is issued."""
 
     msg = requests.get('http://{}/sync_start_all'.format(context.user_data['choice']['ip'])).json()
-    update.message.reply_text(msg)
+    update.message.reply_text(msg, reply_markup=api_calls_markup)
 
     return TYPING_API_CALL
 
@@ -259,7 +259,7 @@ def stop_sync_all(update, context):
     update.message.reply_text('waiting 30 seconds for cleanup of assetchain folders')
     time.sleep(30)
     msg = requests.get('http://{}/clean_assetchain_folders'.format(context.user_data['choice']['ip'])).json()
-    update.message.reply_text(msg)
+    update.message.reply_text(msg, reply_markup=api_calls_markup)
 
     return TYPING_API_CALL
 
