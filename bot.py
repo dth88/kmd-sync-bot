@@ -19,6 +19,9 @@ configure_keyboard = [['Done']]
 configure_markup = ReplyKeyboardMarkup(configure_keyboard, one_time_keyboard=True)
 
 
+choose_server_keyboard = [['Pick a server']]
+choose_server_markup = ReplyKeyboardMarkup(choose_server_keyboard, one_time_keyboard=True)
+
 api_calls_keyboard = [['Setup binary', 'Server info'],
                       ['Start all', 'Stop all', 'Get status'],
                       ['Pick another server']]
@@ -92,7 +95,7 @@ def send_typing_action(func):
 
 @send_typing_action
 def start(update, context):
-    update.message.reply_text('Hi! Lets configure a new sync server! Please provide data in the following format: server_name,ip,rootpass', reply_markup=configure_markup)
+    update.message.reply_text('Hi! Lets configure a new komodo sync server! Please provide data in the \nfollowing format: server_name,ip,rootpass', reply_markup=configure_markup)
     try:
         if context.user_data['servers']:
             pass
@@ -108,10 +111,11 @@ def received_config_information(update, context):
     name, ip, rootpass = update.message.text.split(",")
     context.user_data['new_server'] = {'name' : name, 'ip' : ip, 'pass' : rootpass}
 
-    update.message.reply_text("Neat! Now press Done to start the setup.")
+    update.message.reply_text("Neat! Now press Done to start the setup.", reply_markup=configure_markup)
 
 
     return CONFIGURE
+
 
 #TYPING_CHOICE
 @send_typing_action
@@ -119,47 +123,46 @@ def received_server_choice(update, context):
     available_servers = context.user_data['servers']
     for server in available_servers:
         if update.message.text in server['name']:
-            context.user_data['choice'] = server
-            update.message.reply_text('Now you are in the api state, here you should setup a binary first.')
+            context.user_data['current_server'] = server
+            update.message.reply_text('Now you are in the api state, here you should setup a binary first.', reply_markup=api_calls_markup)
             return ISSUING_API_COMMANDS
 
 
-    for server in available_servers:
-        if update.message.text not in server['name']:
-            update.message.reply_text('Something might be wrong, are you sure you typed the name of the server correctly? try again')
-            return CHOOSING_SERVER
-
+    update.message.reply_text('Something might be wrong, are you sure you typed the name of the server correctly? try again', reply_markup=choose_server_markup)
+    return CHOOSING_SERVER
 
 
 #TYPING_API_CALL
 def received_api_call(update, context):
+    update.message.reply_text(".....", reply_markup=api_calls_markup)
 
     return ISSUING_API_COMMANDS
 
 
+# TODO: make constant calls to api until it is reachable up until 5-10 minutes
 @send_typing_action
 def configure(update, context):
     new_server = context.user_data['new_server']
     ip = new_server['ip']
     rootpass = new_server['pass']
 
-    update.message.reply_text("Starting server setup, could take few minutes...")
+    update.message.reply_text("Starting server setup, could take a few minutes...")
     command = "wget https://raw.githubusercontent.com/dathbezumniy/kmd-sync-api/master/sync_api_setup.sh " \
               "&& chmod u+x sync_api_setup.sh && ./sync_api_setup.sh"
     client = SSHClient(ip, user='root', password=rootpass)
     output = client.run_command(command, sudo=True)
 
-    time.sleep(90)
+    time.sleep(20)
 
     r = requests.get('http://{}'.format(ip)).json()
 
     #first setup and if success then add to the persistent var 'servers'
     if "Hi" in r['message']:
-        update.message.reply_text("Seems like setup is done.")
+        update.message.reply_text("Seems like setup is done. Now you should pick a server.", reply_markup=choose_server_markup)
         context.user_data['servers'].append(new_server)
         return CHOOSING_SERVER
     else:
-        update.message.reply_text("Something might be wrong. API didn't start, try to start over with /start")
+        update.message.reply_text("Something might be wrong. API didn't start, try to start over the configuration with /start")
         return CONFIGURE
     
 
@@ -168,8 +171,8 @@ def make_a_choice(update, context):
     available_servers = context.user_data['servers']
     number_of_servers = len(available_servers)
     if number_of_servers == 1:
-        update.message.reply_text('Currently you registered only one server. I\'m gonna pick it for you. Now you are in the api state, here you should setup a binary first.')
-        context.user_data['choice'] = available_servers[0]
+        update.message.reply_text('Currently you registered only one server. I\'m gonna pick it for you. \nNow you are in the api state, here you should setup a binary first.', reply_markup=api_calls_markup)
+        context.user_data['current_server'] = available_servers[0]
         return ISSUING_API_COMMANDS
 
     elif number_of_servers > 1:
@@ -193,19 +196,16 @@ def make_a_choice(update, context):
 
 @send_typing_action
 def setup_binary(update, context):
-    """Send a message when the command /start_sync is issued."""
     link = {'link' : context.args[0]}
-    msg = requests.post('http://{}/upload_binary'.format(), data=link).json()
+    msg = requests.post('http://{}/upload_binary'.format(context.user_data['current_server']['ip']), data=link).json()
     update.message.reply_text(msg, reply_markup=api_calls_markup)
 
     return TYPING_API_CALL
 
 
-
-
 @send_typing_action
 def get_current_sync_status(update, context):
-    msg = requests.get('http://{}/sync_stats_all'.format(context.user_data['choice']['ip'])).json()
+    msg = requests.get('http://{}/sync_stats_all'.format(context.user_data['current_server']['ip'])).json()
     amount = int(msg['amount'])
     stats = msg['stats']
     reply = 'Currently {} assetchains are syncing\n'.format(amount)
@@ -221,9 +221,8 @@ def get_current_sync_status(update, context):
 
 @send_typing_action
 def start_sync(update, context):
-    """Send a message when the command /start_sync is issued."""
     for ticker in context.args:
-        msg = requests.get('http://{}/sync_start/{}'.format(context.user_data['choice']['ip'], ticker)).json()
+        msg = requests.get('http://{}/sync_start/{}'.format(context.user_data['current_server']['ip'], ticker)).json()
         update.message.reply_text(msg, reply_markup=api_calls_markup)
 
     return TYPING_API_CALL
@@ -231,10 +230,8 @@ def start_sync(update, context):
 
 @send_typing_action
 def stop_sync(update, context):
-    """Send a message when the command /start_sync is issued."""
-
     for ticker in context.args:
-        msg = requests.get('http://{}/sync_stop/{}'.format(context.user_data['choice']['ip'], ticker)).json()
+        msg = requests.get('http://{}/sync_stop/{}'.format(context.user_data['current_server']['ip'], ticker)).json()
         update.message.reply_text(msg, reply_markup=api_calls_markup)
 
     return TYPING_API_CALL
@@ -242,9 +239,7 @@ def stop_sync(update, context):
 
 @send_typing_action
 def start_sync_all(update, context):
-    """Send a message when the command /start_sync is issued."""
-
-    msg = requests.get('http://{}/sync_start_all'.format(context.user_data['choice']['ip'])).json()
+    msg = requests.get('http://{}/sync_start_all'.format(context.user_data['current_server']['ip'])).json()
     update.message.reply_text(msg, reply_markup=api_calls_markup)
 
     return TYPING_API_CALL
@@ -252,16 +247,15 @@ def start_sync_all(update, context):
 
 @send_typing_action
 def stop_sync_all(update, context):
-    """Send a message when the command /start_sync is issued."""
-
-    msg = requests.get('http://{}/sync_stop_all'.format(context.user_data['choice']['ip'])).json()
+    msg = requests.get('http://{}/sync_stop_all'.format(context.user_data['current_server']['ip'])).json()
     update.message.reply_text(msg)
     update.message.reply_text('waiting 30 seconds for cleanup of assetchain folders')
     time.sleep(30)
-    msg = requests.get('http://{}/clean_assetchain_folders'.format(context.user_data['choice']['ip'])).json()
+    msg = requests.get('http://{}/clean_assetchain_folders'.format(context.user_data['current_server']['ip'])).json()
     update.message.reply_text(msg, reply_markup=api_calls_markup)
 
     return TYPING_API_CALL
+
 
 
 @send_typing_action
