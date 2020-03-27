@@ -22,9 +22,8 @@ configure_markup = ReplyKeyboardMarkup(configure_keyboard, one_time_keyboard=Tru
 choose_server_keyboard = [['Pick a server']]
 choose_server_markup = ReplyKeyboardMarkup(choose_server_keyboard, one_time_keyboard=True)
 
-api_calls_keyboard = [['Setup binary', 'Server info'],
-                      ['Start all', 'Stop all', 'Get status'],
-                      ['Pick another server']]
+api_calls_keyboard = [['Start all', 'Stop all', 'Get status'],
+                      ['Pick another server', 'Server info']]
 api_calls_markup = ReplyKeyboardMarkup(api_calls_keyboard, one_time_keyboard=True)
 
 
@@ -37,6 +36,7 @@ def main():
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
         states={
+
             CONFIGURE: [MessageHandler(Filters.regex('^(Done)$'), configure)],
 
             TYPING_REPLY: [MessageHandler(Filters.text, received_config_information)],
@@ -78,8 +78,6 @@ def main():
 
     updater.start_polling()
     updater.idle()
-
-
 
 
 def send_typing_action(func):
@@ -124,7 +122,7 @@ def received_server_choice(update, context):
     for server in available_servers:
         if update.message.text in server['name']:
             context.user_data['current_server'] = server
-            update.message.reply_text('Now you are in the api state, here you should setup a binary first.', reply_markup=api_calls_markup)
+            update.message.reply_text('Now you are in the api state, here you should setup a binary first. \nUse: /setup_binary [link_to_a_downloadable_binaries_in.zip]', reply_markup=api_calls_markup)
             return ISSUING_API_COMMANDS
 
 
@@ -134,12 +132,10 @@ def received_server_choice(update, context):
 
 #TYPING_API_CALL
 def received_api_call(update, context):
-    update.message.reply_text(".....", reply_markup=api_calls_markup)
 
     return ISSUING_API_COMMANDS
 
-
-# TODO: make constant calls to api until it is reachable up until 5-10 minutes
+# TODO: end-to-end test to check if the daemon is able to start.
 @send_typing_action
 def configure(update, context):
     new_server = context.user_data['new_server']
@@ -152,26 +148,25 @@ def configure(update, context):
     client = SSHClient(ip, user='root', password=rootpass)
     output = client.run_command(command, sudo=True)
 
-    time.sleep(20)
+    time.sleep(200)
 
     r = requests.get('http://{}'.format(ip)).json()
-
-    #first setup and if success then add to the persistent var 'servers'
     if "Hi" in r['message']:
         update.message.reply_text("Seems like setup is done. Now you should pick a server.", reply_markup=choose_server_markup)
         context.user_data['servers'].append(new_server)
         return CHOOSING_SERVER
-    else:
-        update.message.reply_text("Something might be wrong. API didn't start, try to start over the configuration with /start")
-        return CONFIGURE
     
+    
+    update.message.reply_text("Something might be wrong. API didn't start, try to start over the configuration with /start")
+    return CONFIGURE
+
 
 @send_typing_action
 def make_a_choice(update, context):
     available_servers = context.user_data['servers']
     number_of_servers = len(available_servers)
     if number_of_servers == 1:
-        update.message.reply_text('Currently you registered only one server. I\'m gonna pick it for you. \nNow you are in the api state, here you should setup a binary first.', reply_markup=api_calls_markup)
+        update.message.reply_text('Currently you have registered only one server. I\'m gonna pick it for you. \nNow you are in the API state, here you should setup a binary first.\n Use /setup_binary [link-to-a-downloadable-binaries-in.zip]', reply_markup=api_calls_markup)
         context.user_data['current_server'] = available_servers[0]
         return ISSUING_API_COMMANDS
 
@@ -191,7 +186,7 @@ def make_a_choice(update, context):
 
 
 
-
+#### API CALLS
 
 
 @send_typing_action
@@ -200,7 +195,7 @@ def setup_binary(update, context):
     msg = requests.post('http://{}/upload_binary'.format(context.user_data['current_server']['ip']), data=link).json()
     update.message.reply_text(msg, reply_markup=api_calls_markup)
 
-    return TYPING_API_CALL
+    return ISSUING_API_COMMANDS
 
 
 @send_typing_action
@@ -216,7 +211,7 @@ def get_current_sync_status(update, context):
     update.message.reply_text(reply, reply_markup=api_calls_markup)
 
 
-    return TYPING_API_CALL
+    return ISSUING_API_COMMANDS
 
 
 @send_typing_action
@@ -225,7 +220,7 @@ def start_sync(update, context):
         msg = requests.get('http://{}/sync_start/{}'.format(context.user_data['current_server']['ip'], ticker)).json()
         update.message.reply_text(msg, reply_markup=api_calls_markup)
 
-    return TYPING_API_CALL
+    return ISSUING_API_COMMANDS
 
 
 @send_typing_action
@@ -234,7 +229,7 @@ def stop_sync(update, context):
         msg = requests.get('http://{}/sync_stop/{}'.format(context.user_data['current_server']['ip'], ticker)).json()
         update.message.reply_text(msg, reply_markup=api_calls_markup)
 
-    return TYPING_API_CALL
+    return ISSUING_API_COMMANDS
 
 
 @send_typing_action
@@ -242,7 +237,7 @@ def start_sync_all(update, context):
     msg = requests.get('http://{}/sync_start_all'.format(context.user_data['current_server']['ip'])).json()
     update.message.reply_text(msg, reply_markup=api_calls_markup)
 
-    return TYPING_API_CALL
+    return ISSUING_API_COMMANDS
 
 
 @send_typing_action
@@ -254,8 +249,7 @@ def stop_sync_all(update, context):
     msg = requests.get('http://{}/clean_assetchain_folders'.format(context.user_data['current_server']['ip'])).json()
     update.message.reply_text(msg, reply_markup=api_calls_markup)
 
-    return TYPING_API_CALL
-
+    return ISSUING_API_COMMANDS
 
 
 @send_typing_action
