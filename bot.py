@@ -47,7 +47,7 @@ def main():
 
             ISSUING_API_COMMANDS: [MessageHandler(Filters.regex('^(Setup binary)$'), setup_binary),
                                    CommandHandler('setup_binary', setup_binary),
-                                   MessageHandler(Filters.regex('^(Server info)$'), help),
+                                   MessageHandler(Filters.regex('^(Server info)$'), show_current_server),
                                    MessageHandler(Filters.regex('^(Start all)$'), start_sync_all),
                                    CommandHandler('start_sync', start_sync),
                                    MessageHandler(Filters.regex('^(Stop all)$'), stop_sync_all),
@@ -93,7 +93,7 @@ def send_typing_action(func):
 
 @send_typing_action
 def start(update, context):
-    update.message.reply_text('Hi! Lets configure a new komodo sync server! Please provide data in the \nfollowing format: server_name,ip,rootpass', reply_markup=configure_markup)
+    update.message.reply_text('Hi! Lets configure a new komodo sync server! Please provide data in the \nfollowing format: server_name,ip,rootpass')
     try:
         if context.user_data['servers']:
             pass
@@ -149,7 +149,7 @@ def configure(update, context):
         update.message.reply_text("Seems like setup is already done on this server. Now you should pick a server.", reply_markup=choose_server_markup)
         context.user_data['servers'].append(new_server)
         return CHOOSING_SERVER
-    
+
     update.message.reply_text("Starting server setup, could take a few minutes...")
     command = "wget https://raw.githubusercontent.com/dathbezumniy/kmd-sync-api/master/sync_api_setup.sh " \
               "&& chmod u+x sync_api_setup.sh && ./sync_api_setup.sh"
@@ -258,6 +258,15 @@ def stop_sync_all(update, context):
     update.message.reply_text(msg, reply_markup=api_calls_markup)
 
     return ISSUING_API_COMMANDS
+
+
+@send_typing_action
+def show_current_server(update, context):
+    msg = 'Currently you are on {}'.format(context.user_data['current_server']['name'], context.user_data['current_server']['ip'])
+    update.message.reply_text(msg, reply_markup=api_calls_markup)
+
+    return ISSUING_API_COMMANDS
+
 
 
 @send_typing_action
