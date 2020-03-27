@@ -53,7 +53,7 @@ def main():
                                    MessageHandler(Filters.regex('^(Stop all)$'), stop_sync_all),
                                    CommandHandler('stop_sync', stop_sync),
                                    MessageHandler(Filters.regex('^(Get status)$'), get_current_sync_status),
-                                   MessageHandler(Filters.regex('^(Pick another server)$'), help)],
+                                   MessageHandler(Filters.regex('^(Pick another server)$'), make_a_choice)],
 
             TYPING_API_CALL: [MessageHandler(Filters.text, received_api_call)],
         },
@@ -135,6 +135,8 @@ def received_api_call(update, context):
 
     return ISSUING_API_COMMANDS
 
+
+
 # TODO: end-to-end test to check if the daemon is able to start.
 @send_typing_action
 def configure(update, context):
@@ -142,6 +144,12 @@ def configure(update, context):
     ip = new_server['ip']
     rootpass = new_server['pass']
 
+    r = requests.get('http://{}'.format(ip)).json()
+    if "Hi" in r['message']:
+        update.message.reply_text("Seems like setup is already done on this server. Now you should pick a server.", reply_markup=choose_server_markup)
+        context.user_data['servers'].append(new_server)
+        return CHOOSING_SERVER
+    
     update.message.reply_text("Starting server setup, could take a few minutes...")
     command = "wget https://raw.githubusercontent.com/dathbezumniy/kmd-sync-api/master/sync_api_setup.sh " \
               "&& chmod u+x sync_api_setup.sh && ./sync_api_setup.sh"
@@ -174,7 +182,7 @@ def make_a_choice(update, context):
         update.message.reply_text('To pick a server just reply with a name. Currently you registered {} servers. Here they are:'.format(number_of_servers))
         msg = ''
         for server in available_servers:
-            msg += '{} --> {}'.format(server['name'], server['ip'])
+            msg += '{} --> {}\n'.format(server['name'], server['ip'])
         update.message.reply_text(msg)
         return TYPING_CHOICE
 
