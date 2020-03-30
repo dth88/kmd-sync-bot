@@ -2,11 +2,13 @@
 import logging
 import requests
 import time
+import os
 from pssh.clients import SSHClient
 from functools import wraps
 from telegram import ReplyKeyboardMarkup, ChatAction
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
                           ConversationHandler, DictPersistence)
+
 
 
 #states
@@ -29,7 +31,7 @@ api_calls_markup = ReplyKeyboardMarkup(api_calls_keyboard, one_time_keyboard=Tru
 
 def main():
     bot_persistence = DictPersistence()
-    updater = Updater("971322549:AAHwgjKp-_i4qbimcSAenYpD_I8CI87uClk", persistence=bot_persistence, use_context=True)
+    updater = Updater(os.environ['SYNC_BOT_TOKEN'], persistence=bot_persistence, use_context=True)
     dp = updater.dispatcher
 
 
