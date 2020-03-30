@@ -238,7 +238,7 @@ def get_current_sync_status(update, context):
 
 
 def zero_division_fix(blocks, longestchain):
-    return blocks / longestchain if longest else 0
+    return blocks / longestchain if longestchain else 0
 
 
 
