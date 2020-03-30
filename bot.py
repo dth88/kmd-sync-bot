@@ -218,17 +218,17 @@ def get_current_sync_status(update, context):
     if amount:
         for k,v in stats.items():
             if v['synced']:
-                reply += '{}- sync: {}. Blocks {} out of {} {:.1%}\n'.format(v['coin'], 
+                reply += '{}\t sync: {}\t Blocks {} out of {}\t {:.1%}\n'.format(v['coin'], 
                                                                            emojize(":white_check_mark:", use_aliases=True),
                                                                            v['blocks'],
                                                                            v['longestchain'],
-                                                                           zero_division_fix(int(v['longestchain']),int(v['blocks'])))
+                                                                           zero_division_fix(int(v['blocks']), int(v['longestchain'])))
             else:
-                reply += '{}- sync: {}. Blocks {} out of {} {:.1%}\n'.format(v['coin'],
+                reply += '{}\t sync: {}\t Blocks {} out of {}\t {:.1%}\n'.format(v['coin'],
                                                                            emojize(":no_entry:", use_aliases=True),
                                                                            v['blocks'],
                                                                            v['longestchain'],
-                                                                           zero_division_fix(int(v['longestchain']),int(v['blocks'])))
+                                                                           zero_division_fix(int(v['blocks']), int(v['longestchain'])))
             
     
     update.message.reply_text(reply, reply_markup=api_calls_markup)
