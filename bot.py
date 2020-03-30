@@ -217,19 +217,18 @@ def get_current_sync_status(update, context):
     reply = 'Currently {} assetchains are syncing\n'.format(amount)
     if amount:
         for k,v in stats.items():
-            if v['synced']{
+            if v['synced']:
                 reply += '{}- sync: {}. Blocks {} out of {} {:%}\n'.format(v['coin'], 
                                                                            emojize(":no_entry:", use_aliases=True),
                                                                            v['blocks'],
                                                                            v['longestchain'],
                                                                            int(v['longestchain'])/int(v['blocks']))
-            } else{
+            else:
                 reply += '{}- sync: {}. Blocks {} out of {} {:%}\n'.format(v['coin'],
                                                                            emojize(":white_check_mark:", use_aliases=True),
                                                                            v['blocks'],
                                                                            v['longestchain'],
                                                                            zero_division_fix(int(v['longestchain']),int(v['blocks'])))
-            }
             
     
     update.message.reply_text(reply, reply_markup=api_calls_markup)
