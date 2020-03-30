@@ -218,14 +218,14 @@ def get_current_sync_status(update, context):
     if amount:
         for k,v in stats.items():
             if v['synced']:
-                reply += '{}- sync: {}. Blocks {} out of {} {:%}\n'.format(v['coin'], 
-                                                                           emojize(":no_entry:", use_aliases=True),
+                reply += '{}- sync: {}. Blocks {} out of {} {:.1%}\n'.format(v['coin'], 
+                                                                           emojize(":white_check_mark:", use_aliases=True),
                                                                            v['blocks'],
                                                                            v['longestchain'],
-                                                                           int(v['longestchain'])/int(v['blocks']))
+                                                                           zero_division_fix(int(v['longestchain']),int(v['blocks'])))
             else:
-                reply += '{}- sync: {}. Blocks {} out of {} {:%}\n'.format(v['coin'],
-                                                                           emojize(":white_check_mark:", use_aliases=True),
+                reply += '{}- sync: {}. Blocks {} out of {} {:.1%}\n'.format(v['coin'],
+                                                                           emojize(":no_entry:", use_aliases=True),
                                                                            v['blocks'],
                                                                            v['longestchain'],
                                                                            zero_division_fix(int(v['longestchain']),int(v['blocks'])))
