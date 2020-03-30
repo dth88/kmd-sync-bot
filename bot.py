@@ -214,19 +214,19 @@ def get_current_sync_status(update, context):
     msg = requests.get('http://{}/sync_stats_all'.format(context.user_data['current_server']['ip'])).json()
     amount = int(msg['amount'])
     stats = msg['stats']
-    reply = 'Currently {} assetchains are syncing\n'.format(amount)
-    reply += '{:9}|{:9}|{:9}|{:9}|{:9}\n'.format('Ticker', 'Sync', 'Got', 'Total', 'Sync%')
+    reply = 'Currently {} assetchains are syncing:\n'.format(amount)
+    reply += '{:10}|  {:9}|  {:9}|  {:9}|  {:9}\n'.format('Ticker', 'Sync', 'Got', 'Total', 'Sync%')
 
     if amount:
         for k,v in stats.items():
             if v['synced']:
-                reply += '{:9}{:9}{:9}{:9}{:9.1%}\n'.format(v['coin'], 
+                reply += '{:12}{:9}{:9}{:9}{:9.1%}\n'.format(v['coin'], 
                                                             emojize(":white_check_mark:", use_aliases=True),
                                                             v['blocks'],
                                                             v['longestchain'],
                                                             zero_division_fix(int(v['blocks']), int(v['longestchain'])))
             else:
-                reply += '{:9}{:9}{:9}{:9}{:9.1%}\n'.format(v['coin'],
+                reply += '{:12}{:9}{:9}{:9}{:9.1%}\n'.format(v['coin'],
                                                             emojize(":no_entry:", use_aliases=True),
                                                             v['blocks'],
                                                             v['longestchain'],
