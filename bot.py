@@ -215,18 +215,18 @@ def get_current_sync_status(update, context):
     amount = int(msg['amount'])
     stats = msg['stats']
     reply = 'Currently {} assetchains are syncing\n'.format(amount)
-    reply += 'Ticker |  Sync | Got blocks |  Total blocks |  Sync%\n'
+    reply += 'Ticker   |     Sync     |     Got    |     Total    |     Sync%\n'
 
     if amount:
         for k,v in stats.items():
             if v['synced']:
-                reply += '{}\t sync: {}\t Blocks {} out of {}\t {:.1%}\n'.format(v['coin'], 
+                reply += '{}            {}          {}          {}           {:.1%}\n'.format(v['coin'], 
                                                                            emojize(":white_check_mark:", use_aliases=True),
                                                                            v['blocks'],
                                                                            v['longestchain'],
                                                                            zero_division_fix(int(v['blocks']), int(v['longestchain'])))
             else:
-                reply += '{}\t sync: {}\t Blocks {} out of {}\t {:.1%}\n'.format(v['coin'],
+                reply += '{}            {}          {}          {}           {:.1%}\n'.format(v['coin'],
                                                                            emojize(":no_entry:", use_aliases=True),
                                                                            v['blocks'],
                                                                            v['longestchain'],
