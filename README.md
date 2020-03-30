@@ -12,7 +12,7 @@ For now there's no database or serialization of any kind, so as soon as your bot
 
 ## Installation
 I've configured both bot and api to work with supervisor so basically you just need to clone repo, install requirements, put you telegram token in SYNC_BOT_TOKEN env var and start it with supervisord.
-For now this bot capabilities will help you to manage multiple sync servers with custom binaries, as soon as you launch the bot and type /start it will guide you through the setup process.
+For now this bot capabilities will help you to manage multiple sync servers with custom binaries, as soon as you launch it and type /start bot will guide you through the setup process.
 
 
 ## Using the bot

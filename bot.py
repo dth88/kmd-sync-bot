@@ -264,7 +264,10 @@ def stop_sync_all(update, context):
 
 @send_typing_action
 def show_current_server(update, context):
-    msg = 'Currently you are on {}'.format(context.user_data['current_server']['name'], context.user_data['current_server']['ip'])
+    current_server = context.user_data['current_server']
+    name = current_server['name']
+    ip = current_server['ip']
+    msg = 'Currently you are on {}, --> {}'.format(name, ip)
     update.message.reply_text(msg, reply_markup=api_calls_markup)
 
     return ISSUING_API_COMMANDS
