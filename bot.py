@@ -215,28 +215,29 @@ def get_current_sync_status(update, context):
     amount = int(msg['amount'])
     stats = msg['stats']
     reply = 'Currently {} assetchains are syncing\n'.format(amount)
-    reply += 'Ticker   |     Sync     |     Got    |     Total    |     Sync%\n'
+    reply += '{:9}|{:9}|{:9}|{:9}|{:9}\n'.format('Ticker', 'Sync', 'Got', 'Total', 'Sync%')
 
     if amount:
         for k,v in stats.items():
             if v['synced']:
-                reply += '{}            {}          {}          {}           {:.1%}\n'.format(v['coin'], 
-                                                                           emojize(":white_check_mark:", use_aliases=True),
-                                                                           v['blocks'],
-                                                                           v['longestchain'],
-                                                                           zero_division_fix(int(v['blocks']), int(v['longestchain'])))
+                reply += '{:9}{:9}{:9}{:9}{:9.1%}\n'.format(v['coin'], 
+                                                            emojize(":white_check_mark:", use_aliases=True),
+                                                            v['blocks'],
+                                                            v['longestchain'],
+                                                            zero_division_fix(int(v['blocks']), int(v['longestchain'])))
             else:
-                reply += '{}            {}          {}          {}           {:.1%}\n'.format(v['coin'],
-                                                                           emojize(":no_entry:", use_aliases=True),
-                                                                           v['blocks'],
-                                                                           v['longestchain'],
-                                                                           zero_division_fix(int(v['blocks']), int(v['longestchain'])))
+                reply += '{:9}{:9}{:9}{:9}{:9.1%}\n'.format(v['coin'],
+                                                            emojize(":no_entry:", use_aliases=True),
+                                                            v['blocks'],
+                                                            v['longestchain'],
+                                                            zero_division_fix(int(v['blocks']), int(v['longestchain'])))
             
     
     update.message.reply_text(reply, reply_markup=api_calls_markup)
 
 
     return ISSUING_API_COMMANDS
+
 
 
 def zero_division_fix(blocks, longestchain):
