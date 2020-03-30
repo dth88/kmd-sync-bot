@@ -215,6 +215,8 @@ def get_current_sync_status(update, context):
     amount = int(msg['amount'])
     stats = msg['stats']
     reply = 'Currently {} assetchains are syncing\n'.format(amount)
+    reply += 'Ticker |  Sync | Got blocks |  Total blocks |  Sync%\n'
+
     if amount:
         for k,v in stats.items():
             if v['synced']:
