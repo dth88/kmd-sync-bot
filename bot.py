@@ -216,21 +216,24 @@ def get_current_sync_status(update, context):
     stats = msg['stats']
     reply = 'Currently {} assetchains are syncing:\n'.format(amount)
     reply += '{:10}|  {:9}|  {:9}|  {:9}|  {:9}\n'.format('Ticker', 'Sync', 'Got', 'Total', 'Sync%')
-
+    
+    width = 9
     if amount:
         for k,v in stats.items():
             if v['synced']:
-                reply += '{:<6}{:>9}{:^9}{:^9}{:^9.0%}\n'.format(v['coin'], 
+                reply += '{:{width}}{:{width}}{:{width}}{:{width}}{:{width}.0%}\n'.format(v['coin'], 
                                                             emojize(":white_check_mark:", use_aliases=True),
                                                             v['blocks'],
                                                             v['longestchain'],
-                                                            zero_division_fix(int(v['blocks']), int(v['longestchain'])))
+                                                            zero_division_fix(int(v['blocks']), int(v['longestchain']),
+                                                            width=width))
             else:
-                reply += '{:<6}{:>9}{:^9}{:^9}{:^9.0%}\n'.format(v['coin'],
+                reply += '{:{width}}{:{width}}{:{width}}{:{width}}{:{width}.0%}\n'.format(v['coin'],
                                                             emojize(":no_entry:", use_aliases=True),
                                                             v['blocks'],
                                                             v['longestchain'],
-                                                            zero_division_fix(int(v['blocks']), int(v['longestchain'])))
+                                                            zero_division_fix(int(v['blocks']), int(v['longestchain'])
+                                                            width=width))
             
     
     update.message.reply_text(reply, reply_markup=api_calls_markup)
