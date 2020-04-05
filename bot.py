@@ -6,7 +6,7 @@ import os
 from emoji import emojize
 from pssh.clients import SSHClient
 from functools import wraps
-from telegram import ReplyKeyboardMarkup, ChatAction
+from telegram import ReplyKeyboardMarkup, ChatAction, ParseMode
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
                           ConversationHandler, DictPersistence)
 
@@ -207,26 +207,26 @@ def get_current_sync_status(update, context):
     msg = requests.get('http://{}/sync_stats_all'.format(context.user_data['current_server']['ip'])).json()
     amount = int(msg['amount'])
     stats = msg['stats']
-    reply = 'Currently {} assetchains are syncing:\n'.format(amount)
+    reply = '<pre>Currently {} assetchains are syncing:\n'.format(amount)
     reply += '{:10}|  {:9}|  {:9}|  {:9}|  {:9}\n'.format('TICKER', 'SYNC', 'GOT', 'TOTAL', 'SYNC%')
     
     if amount:
         for k,v in stats.items():
             if v['synced']:
-                reply +="" + v['coin']                                     + "="*(10-len(v['coin']))\
+                reply +="" + v['coin']                                     + " "*(10-len(v['coin']))\
                         + emojize(":white_check_mark:", use_aliases=True)  + " "*(9-len(emojize(":white_check_mark:", use_aliases=True)))\
                         + str(v['blocks'])                                 + " "*(9-len(str(v['blocks'])))\
                         + str(v['longestchain'])                           + " "*(9-len(str(v['longestchain'])))\
                         + "{:.0%}".format(zero_division_fix(v['blocks'], v['longestchain'])) + "\n"
             else:
-                reply +="" + v['coin']                                     + "="*(10-len(v['coin']))\
+                reply +="" + v['coin']                                     + " "*(10-len(v['coin']))\
                         + emojize(":no_entry:", use_aliases=True)          + " "*(9-len(emojize(":no_entry:", use_aliases=True)))\
                         + str(v['blocks'])                                 + " "*(9-len(str(v['blocks'])))\
                         + str(v['longestchain'])                           + " "*(9-len(str(v['longestchain'])))\
                         + "{:.0%}".format(zero_division_fix(v['blocks'], v['longestchain'])) + "\n"
             
-    
-    update.message.reply_text(reply, reply_markup=api_calls_markup)
+    reply += "</pre>"
+    update.message.reply_text(reply, reply_markup=api_calls_markup, parse_mode=ParseMode.HTML)
 
 
     return ISSUING_API_COMMANDS
