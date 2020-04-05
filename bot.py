@@ -213,17 +213,17 @@ def get_current_sync_status(update, context):
     if amount:
         for k,v in stats.items():
             if v['synced']:
-                reply += v['coin'],                                                          " "*(10-len(v['coin']))\
-                         + emojize(":white_check_mark:", use_aliases=True),                  " "*8\
-                         + str(v['blocks']),                                                 " "*(9-len(str(v['blocks'])))\
-                         + str(zero_division_fix(int(v['blocks']), int(v['longestchain']))), " "*(9-len(str(zero_division_fix(int(v['blocks']), int(v['longestchain'])))))\
-                         + str(v['longestchain']),                                           " "*(9-len(str(v['longestchain']))) + "\n"
+                reply += " " + v['coin']                                           + " "*(10-len(v['coin']))\
+                         + emojize(":white_check_mark:", use_aliases=True)         + " "*8\
+                         + str(v['blocks'])                                        + " "*(9-len(str(v['blocks'])))\
+                         + str(zero_division_fix(v['blocks'], v['longestchain']))  + " "*(9-len(str(zero_division_fix(v['blocks'], v['longestchain']))))\
+                         + str(v['longestchain'])                                  + " "*(9-len(str(v['longestchain']))) + "\n"
             else:
-                reply += v['coin'],                                                          " "*(10-len(v['coin']))\
-                         + emojize(":no_entry:", use_aliases=True),                          " "*8\
-                         + str(v['blocks']),                                                 " "*(9-len(str(v['blocks'])))\
-                         + str(zero_division_fix(int(v['blocks']), int(v['longestchain']))), " "*(9-len(str(zero_division_fix(int(v['blocks']), int(v['longestchain'])))))\
-                         + str(v['longestchain']),                                           " "*(9-len(str(v['longestchain']))) + "\n"
+                reply += " " + v['coin']                                           + " "*(10-len(v['coin']))\
+                         + emojize(":no_entry:", use_aliases=True))                + " "*8\
+                         + str(v['blocks'])                                        + " "*(9-len(str(v['blocks'])))\
+                         + str(zero_division_fix(v['blocks'], v['longestchain']))  + " "*(9-len(str(zero_division_fix(v['blocks'], v['longestchain']))))\
+                         + str(v['longestchain'])                                  + " "*(9-len(str(v['longestchain']))) + "\n"
             
     
     update.message.reply_text(reply, reply_markup=api_calls_markup)
