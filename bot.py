@@ -220,7 +220,7 @@ def get_current_sync_status(update, context):
                          + str(v['longestchain'])                                  + " "*(9-len(str(v['longestchain']))) + "\n"
             else:
                 reply += " " + v['coin']                                           + " "*(10-len(v['coin']))\
-                         + emojize(":no_entry:", use_aliases=True))                + " "*8\
+                         + emojize(":no_entry:", use_aliases=True)                 + " "*8\
                          + str(v['blocks'])                                        + " "*(9-len(str(v['blocks'])))\
                          + str(zero_division_fix(v['blocks'], v['longestchain']))  + " "*(9-len(str(zero_division_fix(v['blocks'], v['longestchain']))))\
                          + str(v['longestchain'])                                  + " "*(9-len(str(v['longestchain']))) + "\n"
