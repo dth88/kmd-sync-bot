@@ -15,12 +15,17 @@ from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
 #states
 CONFIGURE, CHOOSING_SERVER, ISSUING_API_COMMANDS, TYPING_REPLY, TYPING_CHOICE, TYPING_API_CALL = range(6)
 
+# TODO: proper logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
+#keyboards
 configure_keyboard = [['Done']]
 configure_markup = ReplyKeyboardMarkup(configure_keyboard, one_time_keyboard=True)
 
+confirmation_keyboard = [['Yes', 'No']]
+confirmation_markup = ReplyKeyboardMarkup(confirmation_keyboard, one_time_keyboard=True)
 
 choose_server_keyboard = [['Pick a server']]
 choose_server_markup = ReplyKeyboardMarkup(choose_server_keyboard, one_time_keyboard=True)
@@ -66,19 +71,7 @@ def main():
     )
 
     dp.add_handler(conv_handler)
-    
     dp.add_error_handler(error)
-
-
-    #dp.add_handler(CommandHandler("start", start))
-    #dp.add_handler(CommandHandler("start_sync", start_sync))
-    #dp.add_handler(CommandHandler("start_sync_all", start_sync_all))
-    #dp.add_handler(CommandHandler("stop_sync", stop_sync))
-    #dp.add_handler(CommandHandler("stop_sync_all", stop_sync_all))
-    #dp.add_handler(CommandHandler("setup_binary", setup_binary))
-    #dp.add_handler(CommandHandler("get_current_sync_status", get_current_sync_status))
-    #dp.add_handler(CommandHandler("help", help))
-
     updater.start_polling()
     updater.idle()
 
@@ -217,23 +210,20 @@ def get_current_sync_status(update, context):
     reply = 'Currently {} assetchains are syncing:\n'.format(amount)
     reply += '{:10}|  {:9}|  {:9}|  {:9}|  {:9}\n'.format('Ticker', 'Sync', 'Got', 'Total', 'Sync%')
     
-    width = 9
     if amount:
         for k,v in stats.items():
             if v['synced']:
-                reply += '{:{width}}{:{width}}{:{width}}{:{width}}{:{width}.0%}\n'.format(v['coin'], 
+                reply += '{:9}{:9}{:9}{:9}{:9.0%}\n'.format(v['coin'], 
                                                             emojize(":white_check_mark:", use_aliases=True),
                                                             v['blocks'],
                                                             v['longestchain'],
-                                                            zero_division_fix(int(v['blocks']), int(v['longestchain']),
-                                                            width=width))
+                                                            zero_division_fix(int(v['blocks']), int(v['longestchain'])))
             else:
-                reply += '{:{width}}{:{width}}{:{width}}{:{width}}{:{width}.0%}\n'.format(v['coin'],
+                reply += '{:9}{:9}{:9}{:9}{:9.0%}\n'.format(v['coin'],
                                                             emojize(":no_entry:", use_aliases=True),
                                                             v['blocks'],
                                                             v['longestchain'],
-                                                            zero_division_fix(int(v['blocks']), int(v['longestchain'])
-                                                            width=width))
+                                                            zero_division_fix(int(v['blocks']), int(v['longestchain'])))
             
     
     update.message.reply_text(reply, reply_markup=api_calls_markup)
