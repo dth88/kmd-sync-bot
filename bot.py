@@ -208,7 +208,7 @@ def get_current_sync_status(update, context):
     amount = int(msg['amount'])
     stats = msg['stats']
     reply = '<pre>Currently {} assetchains are syncing:\n'.format(amount)
-    reply += '{:7}| {:5}|  {:5}|  {:5}|  {:3}\n'.format('TICKER', 'SYNC', 'GOT', 'TOTAL', '%')
+    reply += '{:7}| {:5}|  {:5}|  {:7}|  {:3}\n'.format('TICKER', 'SYNC', 'GOT', 'TOTAL', '%')
     
     if amount:
         for k,v in stats.items():
