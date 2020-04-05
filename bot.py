@@ -215,15 +215,15 @@ def get_current_sync_status(update, context):
             if v['synced']:
                 reply += (v['coin'],                                                       " "*(10-len(v['coin'])),
                          emojize(":white_check_mark:", use_aliases=True),                  " "*(9-len(emojize(":white_check_mark:", use_aliases=True))),
-                         v['blocks'],                                                      " "*(9-len(v['blocks'])),
+                         v['blocks'],                                                      " "*(9-len(str(v['blocks']))),
                          str(zero_division_fix(int(v['blocks'], int(v['longestchain'])))), " "*(9-len(str(zero_division_fix(int(v['blocks'], int(v['longestchain'])))))),
-                         v['longestchain'],                                                " "*(9-len(v['longestchain'])), "\n")
+                         v['longestchain'],                                                " "*(9-len(str(v['longestchain']))), "\n")
             else:
                 reply += (v['coin'],                                                       " "*(10-len(v['coin'])),
                          emojize(":no_entry:", use_aliases=True),                          " "*(9-len(emojize(":no_entry:", use_aliases=True))),
                          v['blocks'],                                                      " "*(9-len(str(v['blocks']))),
                          str(zero_division_fix(int(v['blocks'], int(v['longestchain'])))), " "*(9-len(str(zero_division_fix(int(v['blocks'], int(v['longestchain'])))))),
-                         v['longestchain'],                                                " "*(9-len(v['longestchain'])), "\n")
+                         v['longestchain'],                                                " "*(9-len(str(v['longestchain']))), "\n")
             
     
     update.message.reply_text(reply, reply_markup=api_calls_markup)
