@@ -275,7 +275,7 @@ def stop_kmd(update, context):
     time.sleep(2)
     update.message.reply_text('Lets wait few more seconds for the daemon to stop, before the cleanup.')
     time.sleep(8)
-    update.message.reply_text('Would you like to cleanup KMD sync progress?' reply_markup=confirmation_markup)
+    update.message.reply_text('Would you like to cleanup KMD sync progress?', reply_markup=confirmation_markup)
 
 
     return TYPING_CONFIRMATION
