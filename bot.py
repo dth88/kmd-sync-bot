@@ -33,7 +33,7 @@ choose_server_markup = ReplyKeyboardMarkup(choose_server_keyboard, one_time_keyb
 
 api_calls_keyboard = [['Start all', 'Stop all', 'Get status'],
                       ['Start KMD', 'Stop KMD', 'Available tickers'],
-                      ['Pick a server', 'Server info', 'Setup binary']]
+                      ['Change server', 'Server info', 'Setup binary']]
 api_calls_markup = ReplyKeyboardMarkup(api_calls_keyboard, one_time_keyboard=True)
 
 
@@ -68,7 +68,7 @@ def main():
                                    MessageHandler(Filters.regex('^(Stop all)$'), stop_sync_all),
                                    CommandHandler('stop_sync', stop_sync),
                                    MessageHandler(Filters.regex('^(Get status)$'), get_current_sync_status),
-                                   MessageHandler(Filters.regex('^(Pick another server)$'), make_a_choice)],
+                                   MessageHandler(Filters.regex('^(Change server)$'), make_a_choice)],
 
             TYPING_CONFIRMATION: [MessageHandler(Filters.regex('^(Yes)$'), cleanup),
                                   MessageHandler(Filters.regex('^(No)$'), no_cleanup)],
