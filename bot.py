@@ -32,7 +32,8 @@ choose_server_keyboard = [['Pick a server']]
 choose_server_markup = ReplyKeyboardMarkup(choose_server_keyboard, one_time_keyboard=True)
 
 api_calls_keyboard = [['Start all', 'Stop all', 'Get status'],
-                      ['Pick another server', 'Server info']]
+                      ['Start KMD', 'Stop KMD', 'Available tickers'],
+                      ['Pick a server', 'Server info', 'Setup binary']]
 api_calls_markup = ReplyKeyboardMarkup(api_calls_keyboard, one_time_keyboard=True)
 
 #bot
@@ -131,6 +132,7 @@ def received_server_choice(update, context):
 
 
 # TODO: end-to-end test to check if the daemon is able to start.
+# TODO: check if we are able to parse output and provide user with feedback on what is going on during the installation process
 @send_typing_action
 def configure(update, context):
     new_server = context.user_data['new_server']
@@ -268,7 +270,7 @@ def stop_sync_all(update, context):
     update.message.reply_text(msg)
     update.message.reply_text('Waiting 30 secs for all tickers to stop following a clean up of assetchains folders')
     time.sleep(30)
-    update.message.reply_text('All tickers have stopped. Are you sure you want to proceed(Yes/No) and delete all assetchain folders? All sync progress will be lost.', reply_markup=confirmation_markup)
+    update.message.reply_text('All tickers have stopped. Are you sure you want to proceed(Yes/No) and delete all assetchain folders? All sync progress of subchains will be lost.', reply_markup=confirmation_markup)
     return TYPING_CONFIRMATION
 
 
