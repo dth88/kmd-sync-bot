@@ -6,21 +6,27 @@ import os
 from emoji import emojize
 from pssh.clients import SSHClient
 from functools import wraps
-from telegram import ReplyKeyboardMarkup, ChatAction
+from telegram import ReplyKeyboardMarkup, ChatAction, ParseMode
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
                           ConversationHandler, DictPersistence)
 
 
 
 #states
-CONFIGURE, CHOOSING_SERVER, ISSUING_API_COMMANDS, TYPING_REPLY, TYPING_CHOICE, TYPING_API_CALL = range(6)
+CONFIGURE, CHOOSING_SERVER, ISSUING_API_COMMANDS, TYPING_REPLY, TYPING_CHOICE, TYPING_CONFIRMATION = range(6)
 
+
+# TODO: proper logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
+#keyboards
 configure_keyboard = [['Done']]
 configure_markup = ReplyKeyboardMarkup(configure_keyboard, one_time_keyboard=True)
 
+confirmation_keyboard = [['Yes', 'No']]
+confirmation_markup = ReplyKeyboardMarkup(confirmation_keyboard, one_time_keyboard=True)
 
 choose_server_keyboard = [['Pick a server']]
 choose_server_markup = ReplyKeyboardMarkup(choose_server_keyboard, one_time_keyboard=True)
@@ -29,7 +35,7 @@ api_calls_keyboard = [['Start all', 'Stop all', 'Get status'],
                       ['Pick another server', 'Server info']]
 api_calls_markup = ReplyKeyboardMarkup(api_calls_keyboard, one_time_keyboard=True)
 
-
+#bot
 def main():
     bot_persistence = DictPersistence()
     updater = Updater(os.environ['SYNC_BOT_TOKEN'], persistence=bot_persistence, use_context=True)
@@ -58,21 +64,20 @@ def main():
                                    MessageHandler(Filters.regex('^(Get status)$'), get_current_sync_status),
                                    MessageHandler(Filters.regex('^(Pick another server)$'), make_a_choice)],
 
-            TYPING_API_CALL: [MessageHandler(Filters.text, received_api_call)],
+            TYPING_CONFIRMATION: [MessageHandler(Filters.regex('^(Yes)$'), cleanup),
+                                  MessageHandler(Filters.regex('^(No)$'), no_cleanup)],
         },
 
-        fallbacks=[MessageHandler(Filters.regex('^fallback$'), help),
+        fallbacks=[CommandHandler('help', help)),
                    CommandHandler('start', start)]
     )
 
     dp.add_handler(conv_handler)
-    
     dp.add_error_handler(error)
-
     updater.start_polling()
     updater.idle()
 
-
+#typing action utility func
 def send_typing_action(func):
     """Sends typing action while processing func command."""
 
@@ -84,9 +89,10 @@ def send_typing_action(func):
     return command_func
 
 
+
 @send_typing_action
 def start(update, context):
-    update.message.reply_text('Hi! Lets configure a new komodo sync server! Please provide data in the \nfollowing format: server_name,ip,rootpass')
+    update.message.reply_text('Hi! Lets configure a new komodo sync server! Please provide data in the following format: server_name,ip,rootpass')
     try:
         if context.user_data['servers']:
             pass
@@ -123,12 +129,6 @@ def received_server_choice(update, context):
     return CHOOSING_SERVER
 
 
-#TYPING_API_CALL
-def received_api_call(update, context):
-
-    return ISSUING_API_COMMANDS
-
-
 
 # TODO: end-to-end test to check if the daemon is able to start.
 @send_typing_action
@@ -143,7 +143,7 @@ def configure(update, context):
         context.user_data['servers'].append(new_server)
         return CHOOSING_SERVER
 
-    update.message.reply_text("Starting server setup, could take a few minutes...")
+    update.message.reply_text("Starting server setup, it will take a few minutes...")
     command = "wget https://raw.githubusercontent.com/dathbezumniy/kmd-sync-api/master/sync_api_setup.sh " \
               "&& chmod u+x sync_api_setup.sh && ./sync_api_setup.sh"
     client = SSHClient(ip, user='root', password=rootpass)
@@ -158,7 +158,7 @@ def configure(update, context):
         return CHOOSING_SERVER
     
     
-    update.message.reply_text("Something might be wrong. API didn't start, try to start over the configuration with /start")
+    update.message.reply_text("Something went wrong. API didn't start, you can try to start over the configuration with /start")
     return CONFIGURE
 
 
@@ -204,29 +204,26 @@ def get_current_sync_status(update, context):
     msg = requests.get('http://{}/sync_stats_all'.format(context.user_data['current_server']['ip'])).json()
     amount = int(msg['amount'])
     stats = msg['stats']
-    reply = 'Currently {} assetchains are syncing:\n'.format(amount)
-    reply += '{:10}|  {:9}|  {:9}|  {:9}|  {:9}\n'.format('Ticker', 'Sync', 'Got', 'Total', 'Sync%')
+    reply = '<pre>Currently {} assetchains are syncing:\n'.format(amount)
+    reply += 'TICKER  |SYNC|  GOT   |  TOTAL  |  %\n'
     
-    width = 9
     if amount:
         for k,v in stats.items():
             if v['synced']:
-                reply += '{:{width}}{:{width}}{:{width}}{:{width}}{:{width}.0%}\n'.format(v['coin'], 
-                                                            emojize(":white_check_mark:", use_aliases=True),
-                                                            v['blocks'],
-                                                            v['longestchain'],
-                                                            zero_division_fix(int(v['blocks']), int(v['longestchain']),
-                                                            width=width))
+                reply +="" + v['coin']                                     + " "*(10-len(v['coin']))\
+                        + emojize(":white_check_mark:", use_aliases=True)  + " "*(9-len(emojize(":white_check_mark:", use_aliases=True)))\
+                        + str(v['blocks'])                                 + " "*(9-len(str(v['blocks'])))\
+                        + str(v['longestchain'])                           + " "*(9-len(str(v['longestchain'])))\
+                        + "{:.0%}".format(zero_division_fix(v['blocks'], v['longestchain'])) + "\n"
             else:
-                reply += '{:{width}}{:{width}}{:{width}}{:{width}}{:{width}.0%}\n'.format(v['coin'],
-                                                            emojize(":no_entry:", use_aliases=True),
-                                                            v['blocks'],
-                                                            v['longestchain'],
-                                                            zero_division_fix(int(v['blocks']), int(v['longestchain'])
-                                                            width=width))
+                reply +="" + v['coin']                                     + " "*(10-len(v['coin']))\
+                        + emojize(":no_entry:", use_aliases=True)          + " "*(9-len(emojize(":no_entry:", use_aliases=True)))\
+                        + str(v['blocks'])                                 + " "*(9-len(str(v['blocks'])))\
+                        + str(v['longestchain'])                           + " "*(9-len(str(v['longestchain'])))\
+                        + "{:.0%}".format(zero_division_fix(v['blocks'], v['longestchain'])) + "\n"
             
-    
-    update.message.reply_text(reply, reply_markup=api_calls_markup)
+    reply += "</pre>"
+    update.message.reply_text(reply, reply_markup=api_calls_markup, parse_mode=ParseMode.HTML)
 
 
     return ISSUING_API_COMMANDS
@@ -266,12 +263,28 @@ def start_sync_all(update, context):
 
 @send_typing_action
 def stop_sync_all(update, context):
+
     msg = requests.get('http://{}/sync_stop_all'.format(context.user_data['current_server']['ip'])).json()
     update.message.reply_text(msg)
-    update.message.reply_text('waiting 30 seconds for cleanup of assetchain folders')
+    update.message.reply_text('Waiting 30 secs for all tickers to stop following a clean up of assetchains folders')
     time.sleep(30)
+    update.message.reply_text('All tickers have stopped. Are you sure you want to proceed(Yes/No) and delete all assetchain folders? All sync progress will be lost.', reply_markup=confirmation_markup)
+    return TYPING_CONFIRMATION
+
+
+
+@send_typing_action
+def cleanup(update, context):
     msg = requests.get('http://{}/clean_assetchain_folders'.format(context.user_data['current_server']['ip'])).json()
-    update.message.reply_text(msg, reply_markup=api_calls_markup)
+    update.message.reply_text(msg)
+    time.sleep(2)
+    update.message.reply_text("Done")
+    return ISSUING_API_COMMANDS
+
+
+@send_typing_action
+def no_cleanup(update, context):
+    update.message.reply_text("Very well, sir. No cleanup for you.")
 
     return ISSUING_API_COMMANDS
 
@@ -310,15 +323,6 @@ def help(update, context):
 def error(update, context):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, context.error)
-
-
-
-
-
-
-
-
-
 
 
 if __name__ == '__main__':
