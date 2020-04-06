@@ -63,7 +63,8 @@ def main():
                                    MessageHandler(Filters.regex('^(Start KMD)$'), start_kmd),
                                    MessageHandler(Filters.regex('^(Stop KMD)$'), stop_kmd),
                                    MessageHandler(Filters.regex('^(Available tickers)$'), help),
-                                   MessageHandler(Filters.regex('^(Setup binary)$'), help),
+                                   MessageHandler(Filters.document.mime_type("text/x-python"), help),
+                                   MessageHandler(Filters.document.zip, setup_binary_test),
                                    CommandHandler('start_sync', start_sync),
                                    MessageHandler(Filters.regex('^(Stop all)$'), stop_sync_all),
                                    CommandHandler('stop_sync', stop_sync),
@@ -203,6 +204,17 @@ def setup_binary(update, context):
     update.message.reply_text(msg, reply_markup=api_calls_markup)
 
     return ISSUING_API_COMMANDS
+
+
+@send_typing_action
+def setup_binary_test(update, context):
+    update.message.reply_text(update.message.document.file_id)
+    archive = context.bot.getFile(update.message.document.file_id)
+    archive.download('./new_binaries.zip')
+
+    return ISSUING_API_COMMANDS
+
+
 
 
 @send_typing_action
