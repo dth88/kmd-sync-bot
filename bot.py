@@ -208,10 +208,12 @@ def setup_binary(update, context):
 
 @send_typing_action
 def setup_binary_test(update, context):
+    update.message.reply_text(update.message.document.file_path)
     update.message.reply_text(update.message.document.file_id)
-    archive = context.bot.getFile(update.message.document.file_id)
-    archive.download('./new_binaries.zip')
-
+    msg = requests.get('https://api.telegram.org/bot{}/getFile?file_id={}'.format(os.environ['SYNC_BOT_TOKEN'],update.message.document.file_id)).json()
+    update.message.reply_text(msg)
+    msg = requests.get('https://api.telegram.org/file/bot{}/{}'.format(os.environ['SYNC_BOT_TOKEN'], update.message.document.file_path))
+    update.message.reply_text(msg)
     return ISSUING_API_COMMANDS
 
 
