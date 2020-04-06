@@ -33,7 +33,7 @@ choose_server_markup = ReplyKeyboardMarkup(choose_server_keyboard, one_time_keyb
 
 api_calls_keyboard = [['Start all', 'Stop all', 'Get status'],
                       ['Start KMD', 'Stop KMD', 'Available tickers'],
-                      ['Change server', 'Server info', 'Setup binary']]
+                      ['Change server', 'Server info', 'Get launch params']]
 api_calls_markup = ReplyKeyboardMarkup(api_calls_keyboard, one_time_keyboard=True)
 
 
@@ -56,15 +56,14 @@ def main():
             
             TYPING_CHOICE: [MessageHandler(Filters.text, received_server_choice)],
 
-            ISSUING_API_COMMANDS: [MessageHandler(Filters.regex('^(Setup binary)$'), setup_binary),
-                                   CommandHandler('setup_binary', setup_binary),
-                                   MessageHandler(Filters.regex('^(Server info)$'), show_current_server),
+            ISSUING_API_COMMANDS: [MessageHandler(Filters.regex('^(Server info)$'), show_current_server),
                                    MessageHandler(Filters.regex('^(Start all)$'), start_sync_all),
                                    MessageHandler(Filters.regex('^(Start KMD)$'), start_kmd),
                                    MessageHandler(Filters.regex('^(Stop KMD)$'), stop_kmd),
                                    MessageHandler(Filters.regex('^(Available tickers)$'), help),
                                    MessageHandler(Filters.document.mime_type("text/x-python"), help),
-                                   MessageHandler(Filters.document.zip, setup_binary_test),
+                                   MessageHandler(Filters.document.zip, setup_binary),
+                                   CommandHandler('setup_binary', setup_binary),
                                    CommandHandler('start_sync', start_sync),
                                    MessageHandler(Filters.regex('^(Stop all)$'), stop_sync_all),
                                    CommandHandler('stop_sync', stop_sync),
@@ -176,7 +175,7 @@ def make_a_choice(update, context):
     available_servers = context.user_data['servers']
     number_of_servers = len(available_servers)
     if number_of_servers == 1:
-        update.message.reply_text('Currently you have registered only one server. I\'m gonna pick it for you. \nNow you are in the API state, here you should setup a binary first.\n Use /setup_binary [link-to-a-downloadable-binaries-in.zip]', reply_markup=api_calls_markup)
+        update.message.reply_text('Currently you have registered only one server. I\'m gonna pick it for you. Now you are in the API state, here you should setup a binary first.\nUse /setup_binary [link-to-a-downloadable-binaries-in.zip] \nor drag and drop binaries.zip in this chat.', reply_markup=api_calls_markup)
         context.user_data['current_server'] = available_servers[0]
         return ISSUING_API_COMMANDS
 
@@ -199,24 +198,15 @@ def make_a_choice(update, context):
 
 @send_typing_action
 def setup_binary(update, context):
-    link = {'link' : context.args[0]}
+    if context.args[0]:
+        link = {'link' : context.args[0]}
+    else:
+        link = {'link': 'https://api.telegram.org/bot{}/getFile?file_id={}'.format(os.environ['SYNC_BOT_TOKEN'], update.message.document.file_id)}
+
     msg = requests.post('http://{}/upload_binary'.format(context.user_data['current_server']['ip']), data=link).json()
     update.message.reply_text(msg, reply_markup=api_calls_markup)
 
     return ISSUING_API_COMMANDS
-
-
-@send_typing_action
-def setup_binary_test(update, context):
-    update.message.reply_text(update.message.document.file_path)
-    update.message.reply_text(update.message.document.file_id)
-    msg = requests.get('https://api.telegram.org/bot{}/getFile?file_id={}'.format(os.environ['SYNC_BOT_TOKEN'],update.message.document.file_id)).json()
-    update.message.reply_text(msg)
-    msg = requests.get('https://api.telegram.org/file/bot{}/{}'.format(os.environ['SYNC_BOT_TOKEN'], update.message.document.file_path))
-    update.message.reply_text(msg)
-    return ISSUING_API_COMMANDS
-
-
 
 
 @send_typing_action
