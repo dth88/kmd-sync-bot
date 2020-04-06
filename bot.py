@@ -278,13 +278,13 @@ def cleanup(update, context):
     msg = requests.get('http://{}/clean_assetchain_folders'.format(context.user_data['current_server']['ip'])).json()
     update.message.reply_text(msg)
     time.sleep(2)
-    update.message.reply_text("Done")
+    update.message.reply_text("Done", reply_markup=api_calls_markup)
     return ISSUING_API_COMMANDS
 
 
 @send_typing_action
 def no_cleanup(update, context):
-    update.message.reply_text("Very well, sir. No cleanup for you.")
+    update.message.reply_text("Very well, sir. No cleanup for you.", reply_markup=api_calls_markup)
 
     return ISSUING_API_COMMANDS
 
