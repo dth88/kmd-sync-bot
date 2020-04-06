@@ -57,13 +57,13 @@ def main():
             TYPING_CHOICE: [MessageHandler(Filters.text, received_server_choice)],
 
             ISSUING_API_COMMANDS: [MessageHandler(Filters.regex('^(Setup binary)$'), setup_binary),
-                                   CommandHandler('setup_binary', setup_binary), #hmmm
+                                   CommandHandler('setup_binary', setup_binary),
                                    MessageHandler(Filters.regex('^(Server info)$'), show_current_server),
                                    MessageHandler(Filters.regex('^(Start all)$'), start_sync_all),
-                                   MessageHandler(Filters.regex('^(Start KMD)$'), start_sync_all),
-                                   MessageHandler(Filters.regex('^(Stop KMD)$'), start_sync_all),
-                                   MessageHandler(Filters.regex('^(Available tickers)$'), start_sync_all),
-                                   MessageHandler(Filters.regex('^(Setup binary)$'), start_sync_all),
+                                   MessageHandler(Filters.regex('^(Start KMD)$'), start_kmd),
+                                   MessageHandler(Filters.regex('^(Stop KMD)$'), stop_kmd),
+                                   MessageHandler(Filters.regex('^(Available tickers)$'), help),
+                                   MessageHandler(Filters.regex('^(Setup binary)$'), help),
                                    CommandHandler('start_sync', start_sync),
                                    MessageHandler(Filters.regex('^(Stop all)$'), stop_sync_all),
                                    CommandHandler('stop_sync', stop_sync),
