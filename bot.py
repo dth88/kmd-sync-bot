@@ -262,7 +262,8 @@ def stop_sync(update, context):
 @send_typing_action
 def start_kmd(update, context):
     msg = requests.get('http://{}/sync_start/{}'.format(context.user_data['current_server']['ip'], 'KMD')).json()
-    update.message.reply_text(msg, reply_markup=api_calls_markup)
+    update.message.reply_text(msg)
+    update.message.reply_text('It might take a few minutes for it to appear in Get status.', reply_markup=api_calls_markup)
     context.user_data['KMD'] = 0 #not ready for cleanup
     return ISSUING_API_COMMANDS
 
