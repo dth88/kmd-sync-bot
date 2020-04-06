@@ -351,19 +351,15 @@ def help(update, context):
     help_msg += '           \n'
     help_msg += 'CONFIGURATION_STATE:\n'
     help_msg += 'You can trigger that state with /start from any bot state\n'
-    help_msg += 'After you have provided data in the following format (server_name,ip,rootpass),\
-                 simply press done and bot will start installation on a new server.\n'
+    help_msg += 'After you have provided data in the following format (server_name,ip,rootpass), simply press done and bot will start installation on a new server.\n'
     help_msg += 'It usually takes 2-3 minutes for bot to install all dependencies and start API.\n'
-    help_msg += 'If you\'ve provided server ip with already running API, bot will skip installation\
-                 and forward you to PICK_SERVER_STATE.\n'
+    help_msg += 'If you\'ve provided server ip with already running API, bot will skip installation and forward you to PICK_SERVER_STATE.\n'
     help_msg += '           \n'
     help_msg += 'PICK_SERVER_STATE:\n'
-    help_msg += 'In this state you can only pick a server that you\'ve previously added with /start command.\
-                 Bot will forward you to API_CALL_STATE after you have successfully picked a server.\n'
+    help_msg += 'In this state you can only pick a server that you\'ve previously added with /start command. Bot will forward you to API_CALL_STATE after you have successfully picked a server.\n'
     help_msg += '           \n'
     help_msg += 'API_CALL_STATE'
-    help_msg += 'You will be able to see all available commands on the keyboard.\
-                 Other than the keyboard commands there are few others:\n'
+    help_msg += 'You will be able to see all available commands on the keyboard. Other than the keyboard commands there are few others:\n'
     help_msg += '/start_sync AXO BET PANGEA - start tickers individually.\n'
     help_msg += '/stop_sync AXO BET PANGEA - stop tickers individually with optional cleanup.\n'
 
