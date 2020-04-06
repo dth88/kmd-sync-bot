@@ -186,7 +186,7 @@ def make_a_choice(update, context):
 
     update.message.reply_text('Something probably went wrong on the configuration stage, you have no registered servers. try to start over with /start')
     return CONFIGURE
-    
+
 
 
 #### API CALLS
@@ -280,7 +280,7 @@ def cleanup(update, context):
     msg = requests.get('http://{}/clean_assetchain_folders'.format(context.user_data['current_server']['ip'])).json()
     update.message.reply_text(msg)
     time.sleep(2)
-    update.message.reply_text("Done", reply_markup=api_calls_markup)
+    update.message.reply_text("Finished cleanup. Fresh start, sir.", reply_markup=api_calls_markup)
     return ISSUING_API_COMMANDS
 
 
@@ -306,21 +306,30 @@ def show_current_server(update, context):
 @send_typing_action
 def help(update, context):
     """Send a message when the command /help is issued."""
+    help_msg  = 'There are 3 main states in this bot:\n'
+    help_msg  = 'CONFIGURATION_STATE\n'
+    help_msg  = 'PICK_SERVER_STATE\n'
+    help_msg  = 'API_CALL_STATE\n'
+    help_msg  = '           \n'
     help_msg  = 'Commands that are accessible throughout all states:\n'
     help_msg += '/start - setup a new server.\n'
-    help_msg += '/help - this message.\n'
+    help_msg += '/help - prints this message.\n'
     help_msg += '           \n'
     help_msg += 'CONFIGURATION_STATE:\n'
     help_msg += 'You can trigger that state with /start from any bot state\n'
-    help_msg += 'After you have provided data in the following format (server_name,ip,rootpass) for the configuration, simply press done and bot will start installation on a new server.\n'
+    help_msg += 'After you have provided data in the following format (server_name,ip,rootpass),\
+                 simply press done and bot will start installation on a new server.\n'
     help_msg += 'It usually takes 2-3 minutes for bot to install all dependencies and start API.\n'
-    help_msg += 'If you provide server ip with already running API, bot will skip installation and forward you to PICK_SERVER_STATE.\n'
+    help_msg += 'If you\'ve provided server ip with already running API, bot will skip installation\
+                 and forward you to PICK_SERVER_STATE.\n'
     help_msg += '           \n'
     help_msg += 'PICK_SERVER_STATE:\n'
-    help_msg += 'In this state you can only pick a server that you previously added with /start command.\n'
+    help_msg += 'In this state you can only pick a server that you\'ve previously added with /start command.\
+                 Bot will forward you to API_CALL_STATE after you have successfully picked a server.\n'
     help_msg += '           \n'
     help_msg += 'API_CALL_STATE'
-    help_msg += 'You will be able to see all available commands on the keyboard. Other than keyboard commands there are few others:\n'
+    help_msg += 'You will be able to see all available commands on the keyboard.\
+                 Other than the keyboard commands there are few others:\n'
     help_msg += '/start_sync AXO BET PANGEA - start tickers individually.\n'
     help_msg += '/stop_sync AXO BET PANGEA - stop tickers individually with optional cleanup.\n'
 
