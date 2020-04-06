@@ -68,7 +68,7 @@ def main():
                                   MessageHandler(Filters.regex('^(No)$'), no_cleanup)],
         },
 
-        fallbacks=[CommandHandler('help', help)),
+        fallbacks=[CommandHandler('help', help),
                    CommandHandler('start', start)]
     )
 
