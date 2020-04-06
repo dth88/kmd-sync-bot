@@ -69,16 +69,6 @@ def main():
     
     dp.add_error_handler(error)
 
-
-    #dp.add_handler(CommandHandler("start", start))
-    #dp.add_handler(CommandHandler("start_sync", start_sync))
-    #dp.add_handler(CommandHandler("start_sync_all", start_sync_all))
-    #dp.add_handler(CommandHandler("stop_sync", stop_sync))
-    #dp.add_handler(CommandHandler("stop_sync_all", stop_sync_all))
-    #dp.add_handler(CommandHandler("setup_binary", setup_binary))
-    #dp.add_handler(CommandHandler("get_current_sync_status", get_current_sync_status))
-    #dp.add_handler(CommandHandler("help", help))
-
     updater.start_polling()
     updater.idle()
 
