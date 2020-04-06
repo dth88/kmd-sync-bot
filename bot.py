@@ -60,6 +60,10 @@ def main():
                                    CommandHandler('setup_binary', setup_binary),
                                    MessageHandler(Filters.regex('^(Server info)$'), show_current_server),
                                    MessageHandler(Filters.regex('^(Start all)$'), start_sync_all),
+                                   MessageHandler(Filters.regex('^(Start KMD)$'), start_sync_all),
+                                   MessageHandler(Filters.regex('^(Stop KMD)$'), start_sync_all),
+                                   MessageHandler(Filters.regex('^(Available tickers)$'), start_sync_all),
+                                   MessageHandler(Filters.regex('^(Setup binary)$'), start_sync_all),
                                    CommandHandler('start_sync', start_sync),
                                    MessageHandler(Filters.regex('^(Stop all)$'), stop_sync_all),
                                    CommandHandler('stop_sync', stop_sync),
@@ -256,6 +260,29 @@ def stop_sync(update, context):
 
 
 @send_typing_action
+def start_kmd(update, context):
+    msg = requests.get('http://{}/sync_start/{}'.format(context.user_data['current_server']['ip'], 'KMD')).json()
+    update.message.reply_text(msg, reply_markup=api_calls_markup)
+    context.user_data['KMD'] = 0 #not ready for cleanup
+    return ISSUING_API_COMMANDS
+
+
+@send_typing_action
+def stop_kmd(update, context):
+    msg = requests.get('http://{}/sync_stop/{}'.format(context.user_data['current_server']['ip'], 'KMD')).json()
+    update.message.reply_text(msg)
+    context.user_data['KMD'] = 1 #ready for cleanup
+    time.sleep(2)
+    update.message.reply_text('Lets wait few more seconds for the daemon to stop, before the cleanup.')
+    time.sleep(8)
+    update.message.reply_text('Would you like to cleanup KMD sync progress?' reply_markup=confirmation_markup)
+
+
+    return TYPING_CONFIRMATION
+
+
+
+@send_typing_action
 def start_sync_all(update, context):
     msg = requests.get('http://{}/sync_start_all'.format(context.user_data['current_server']['ip'])).json()
     update.message.reply_text(msg, reply_markup=api_calls_markup)
@@ -277,10 +304,17 @@ def stop_sync_all(update, context):
 
 @send_typing_action
 def cleanup(update, context):
+    if context.user_data['KMD']:
+        msg = requests.get('http://{}/clean_folder/{}'.format(context.user_data['current_server']['ip']), 'KMD').json()
+        update.message.reply_text(msg)
+        time.sleep(2)
+        update.message.reply_text("Finished clean up of KMD. Fresh start, sir.", reply_markup=api_calls_markup)
+        return ISSUING_API_COMMANDS
+    
     msg = requests.get('http://{}/clean_assetchain_folders'.format(context.user_data['current_server']['ip'])).json()
     update.message.reply_text(msg)
     time.sleep(2)
-    update.message.reply_text("Finished cleanup. Fresh start, sir.", reply_markup=api_calls_markup)
+    update.message.reply_text("Finished clean up. Fresh start, sir.", reply_markup=api_calls_markup)
     return ISSUING_API_COMMANDS
 
 
