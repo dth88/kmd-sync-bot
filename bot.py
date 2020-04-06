@@ -199,7 +199,9 @@ def make_a_choice(update, context):
 @send_typing_action
 def setup_binary(update, context):
     if update.message.document:
-        link = {'link': 'https://api.telegram.org/bot{}/getFile?file_id={}'.format(os.environ['SYNC_BOT_TOKEN'], update.message.document.file_id)}
+        archive = context.bot.getFile(update.message.document.file_id)
+        update.message.reply_text(archive.file_path)
+        link = {'link': 'https://api.telegram.org/file/bot{}/{}'.format(os.environ['SYNC_BOT_TOKEN'], archive.file_path)}
     else:
         link = {'link' : context.args[0]}
 
