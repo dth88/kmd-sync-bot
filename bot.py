@@ -36,6 +36,7 @@ api_calls_keyboard = [['Start all', 'Stop all', 'Get status'],
                       ['Pick a server', 'Server info', 'Setup binary']]
 api_calls_markup = ReplyKeyboardMarkup(api_calls_keyboard, one_time_keyboard=True)
 
+
 #bot
 def main():
     bot_persistence = DictPersistence()
@@ -77,6 +78,7 @@ def main():
     dp.add_error_handler(error)
     updater.start_polling()
     updater.idle()
+
 
 #typing action utility func
 def send_typing_action(func):
@@ -187,8 +189,6 @@ def make_a_choice(update, context):
     
 
 
-
-
 #### API CALLS
 
 
@@ -250,9 +250,9 @@ def start_sync(update, context):
 def stop_sync(update, context):
     for ticker in context.args:
         msg = requests.get('http://{}/sync_stop/{}'.format(context.user_data['current_server']['ip'], ticker)).json()
-        update.message.reply_text(msg, reply_markup=api_calls_markup)
+        update.message.reply_text(msg, reply_markup=confirmation_markup)
 
-    return ISSUING_API_COMMANDS
+    return TYPING_CONFIRMATION
 
 
 @send_typing_action
@@ -268,7 +268,7 @@ def stop_sync_all(update, context):
 
     msg = requests.get('http://{}/sync_stop_all'.format(context.user_data['current_server']['ip'])).json()
     update.message.reply_text(msg)
-    update.message.reply_text('Waiting 30 secs for all tickers to stop following a clean up of assetchains folders')
+    update.message.reply_text('Waiting 30 secs for all tickers to stop with a following clean up of assetchains folders')
     time.sleep(30)
     update.message.reply_text('All tickers have stopped. Are you sure you want to proceed(Yes/No) and delete all assetchain folders? All sync progress of subchains will be lost.', reply_markup=confirmation_markup)
     return TYPING_CONFIRMATION
@@ -306,18 +306,23 @@ def show_current_server(update, context):
 @send_typing_action
 def help(update, context):
     """Send a message when the command /help is issued."""
-    help_msg  = 'Configuration:\n'
-    help_msg += '/configure - setup a new server.\n'
-    help_msg += '/show_available_servers - list available servers.\n'
-    help_msg += '/choose_server 1 - select server to execute commands on.\n'
-    help_msg += '/setup_binary - upload a new binary to the server.\n'
+    help_msg  = 'Commands that are accessible throughout all states:\n'
+    help_msg += '/start - setup a new server.\n'
+    help_msg += '/help - this message.\n'
     help_msg += '           \n'
-    help_msg += 'Routine cmds:\n'
-    help_msg += '/start_sync_all - start all tickers without KMD.\n'
-    help_msg += '/start_sync KMD AXO BET - start tickers individually.\n'
-    help_msg += '/stop_sync_all - stop all tickers (will stop them, wait for the processes to close for 30s and then do cleanup of assetchain folders).\n'
-    help_msg += '/stop_sync KMD AXO BET - stop tickers individually without cleanup.\n'
-    help_msg += '/get_current_sync_status - dump sync progress on all initialized tickers.\n'
+    help_msg += 'CONFIGURATION_STATE:\n'
+    help_msg += 'You can trigger that state with /start from any bot state\n'
+    help_msg += 'After you have provided data in the following format (server_name,ip,rootpass) for the configuration, simply press done and bot will start installation on a new server.\n'
+    help_msg += 'It usually takes 2-3 minutes for bot to install all dependencies and start API.\n'
+    help_msg += 'If you provide server ip with already running API, bot will skip installation and forward you to PICK_SERVER_STATE.\n'
+    help_msg += '           \n'
+    help_msg += 'PICK_SERVER_STATE:\n'
+    help_msg += 'In this state you can only pick a server that you previously added with /start command.\n'
+    help_msg += '           \n'
+    help_msg += 'API_CALL_STATE'
+    help_msg += 'You will be able to see all available commands on the keyboard. Other than keyboard commands there are few others:\n'
+    help_msg += '/start_sync AXO BET PANGEA - start tickers individually.\n'
+    help_msg += '/stop_sync AXO BET PANGEA - stop tickers individually with optional cleanup.\n'
 
     update.message.reply_text(help_msg)
 
