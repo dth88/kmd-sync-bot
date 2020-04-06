@@ -340,12 +340,12 @@ def show_current_server(update, context):
 @send_typing_action
 def help(update, context):
     """Send a message when the command /help is issued."""
-    help_msg  = 'There are 3 main states in this bot:\n'
-    help_msg  = '---> CONFIGURATION_STATE\n'
-    help_msg  = '---> PICK_SERVER_STATE\n'
-    help_msg  = '---> API_CALL_STATE\n'
-    help_msg  = '           \n'
-    help_msg  = 'Commands that are accessible throughout all states:\n'
+    help_msg += 'There are 3 main states in this bot:\n'
+    help_msg += '---> CONFIGURATION_STATE\n'
+    help_msg += '---> PICK_SERVER_STATE\n'
+    help_msg += '---> API_CALL_STATE\n'
+    help_msg += '           \n'
+    help_msg += 'Commands that are accessible throughout all states:\n'
     help_msg += '/start - sets up a new server.\n'
     help_msg += '/help - prints this message.\n'
     help_msg += '           \n'
