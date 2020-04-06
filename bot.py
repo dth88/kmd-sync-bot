@@ -57,7 +57,7 @@ def main():
             TYPING_CHOICE: [MessageHandler(Filters.text, received_server_choice)],
 
             ISSUING_API_COMMANDS: [MessageHandler(Filters.regex('^(Setup binary)$'), setup_binary),
-                                   CommandHandler('setup_binary', setup_binary),
+                                   CommandHandler('setup_binary', setup_binary), #hmmm
                                    MessageHandler(Filters.regex('^(Server info)$'), show_current_server),
                                    MessageHandler(Filters.regex('^(Start all)$'), start_sync_all),
                                    MessageHandler(Filters.regex('^(Start KMD)$'), start_sync_all),
