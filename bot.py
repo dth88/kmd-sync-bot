@@ -198,11 +198,11 @@ def make_a_choice(update, context):
 
 @send_typing_action
 def setup_binary(update, context):
-    if context.args:
-        link = {'link' : context.args[0]}
-    else:
+    if update.message.document:
         link = {'link': 'https://api.telegram.org/bot{}/getFile?file_id={}'.format(os.environ['SYNC_BOT_TOKEN'], update.message.document.file_id)}
-    
+    else:
+        link = {'link' : context.args[0]}
+
     msg = requests.post('http://{}/upload_binary'.format(context.user_data['current_server']['ip']), data=link).json()
     update.message.reply_text(msg, reply_markup=api_calls_markup)
 
