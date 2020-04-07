@@ -195,7 +195,7 @@ def make_a_choice(update, context):
 
 #### API CALLS
 
-
+#BINARIES
 @send_typing_action
 def setup_binary(update, context):
     link = {'link' : context.args[0]}
@@ -214,6 +214,7 @@ def setup_binary_dragndrop(update, context):
     return ISSUING_API_COMMANDS
 
 
+# STATUS
 @send_typing_action
 def get_current_sync_status(update, context):
     msg = requests.get('http://{}/sync_stats_all'.format(context.user_data['current_server']['ip'])).json()
@@ -249,7 +250,7 @@ def zero_division_fix(blocks, longestchain):
     return blocks / longestchain if longestchain else 0
 
 
-
+#START/STOP
 @send_typing_action
 def start_sync(update, context):
     for ticker in context.args:
@@ -311,7 +312,7 @@ def stop_sync_all(update, context):
     return TYPING_CONFIRMATION
 
 
-
+#CLEANUP
 @send_typing_action
 def cleanup(update, context):
     if context.user_data['KMD']:
