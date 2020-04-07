@@ -6,7 +6,7 @@ import os
 from emoji import emojize
 from pssh.clients import SSHClient
 from functools import wraps
-from telegram import ReplyKeyboardMarkup, ChatAction, ParseMode
+from telegram import ReplyKeyboardMarkup, ChatAction, ParseMode, File
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
                           ConversationHandler, DictPersistence)
 
@@ -199,8 +199,7 @@ def make_a_choice(update, context):
 @send_typing_action
 def setup_binary(update, context):
     if update.message.document:
-        archive = context.bot.getFile(update.message.document.file_id)
-        update.message.reply_text(archive.file_path)
+        update.message.reply_text(update.message.document)
         link = {'link': 'https://api.telegram.org/file/bot{}/{}'.format(os.environ['SYNC_BOT_TOKEN'], archive.file_path)}
     else:
         link = {'link' : context.args[0]}
