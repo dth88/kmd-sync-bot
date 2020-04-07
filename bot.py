@@ -201,7 +201,7 @@ def setup_binary(update, context):
     if update.message.document.file_id:
         update.message.reply_text(update.message.document.file_id)
         archive = Document(update.message.document.file_id, )
-        link = {'link': 'https://api.telegram.org/file/bot{}/{}'.format(os.environ['SYNC_BOT_TOKEN'], archive.file_path)}
+        link = {'link': 'https://api.telegram.org/file/bot{}/{}'.format(os.environ['SYNC_BOT_TOKEN'])}
     else:
         link = {'link' : context.args[0]}
 
@@ -312,7 +312,7 @@ def stop_sync_all(update, context):
 @send_typing_action
 def cleanup(update, context):
     if context.user_data['KMD']:
-        msg = requests.get('http://{}/clean_folder/{}'.format(context.user_data['current_server']['ip']), 'KMD').json()
+        msg = requests.get('http://{}/clean_folder/{}'.format(context.user_data['current_server']['ip'], 'KMD')).json()
         update.message.reply_text(msg)
         time.sleep(2)
         update.message.reply_text("Finished clean up of KMD. Fresh start, sir.", reply_markup=api_calls_markup)
