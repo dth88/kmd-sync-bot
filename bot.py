@@ -62,7 +62,7 @@ def main():
                                    MessageHandler(Filters.regex('^(Stop KMD)$'), stop_kmd),
                                    MessageHandler(Filters.regex('^(Available tickers)$'), help),
                                    MessageHandler(Filters.document.mime_type("text/x-python"), help),
-                                   MessageHandler(Filters.document.zip, setup_binary),
+                                   MessageHandler(Filters.document.zip, setup_binary_dragndrop),
                                    CommandHandler('setup_binary', setup_binary),
                                    CommandHandler('start_sync', start_sync),
                                    MessageHandler(Filters.regex('^(Stop all)$'), stop_sync_all),
@@ -198,16 +198,19 @@ def make_a_choice(update, context):
 
 @send_typing_action
 def setup_binary(update, context):
-    if update.message.document.file_id:
-        update.message.reply_text(update.message.document.file_id)
-        archive = Document(update.message.document.file_id, )
-        link = {'link': 'https://api.telegram.org/file/bot{}/{}'.format(os.environ['SYNC_BOT_TOKEN'])}
-    else:
-        link = {'link' : context.args[0]}
-
+    link = {'link' : context.args[0]}
     msg = requests.post('http://{}/upload_binary'.format(context.user_data['current_server']['ip']), data=link).json()
     update.message.reply_text(msg, reply_markup=api_calls_markup)
 
+    return ISSUING_API_COMMANDS
+
+
+@send_typing_action
+def setup_binary_dragndrop(update, context):
+    link = {'link': 'drag'}
+    msg = requests.post('http://{}/upload_binary_dragndrop'.format(context.user_data['current_server']['ip']), data=link).json()
+    update.message.reply_text(msg, reply_markup=api_calls_markup)
+    
     return ISSUING_API_COMMANDS
 
 
