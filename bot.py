@@ -1,19 +1,18 @@
 #!/usr/bin/env python3
+import os
+import time
 import logging
 import requests
-import time
-import os
 from emoji import emojize
-from pssh.clients import SSHClient
 from functools import wraps
-from telegram import ReplyKeyboardMarkup, ChatAction, ParseMode, Document
+from pssh.clients import SSHClient
+from telegram import ReplyKeyboardMarkup, ChatAction, ParseMode
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
                           ConversationHandler, DictPersistence)
 
 
-
-#states
-CONFIGURE, CHOOSING_SERVER, ISSUING_API_COMMANDS, TYPING_REPLY, TYPING_CHOICE, TYPING_CONFIRMATION = range(6)
+#STATES
+CONFIGURE, CHOOSE_SERVER, API_CALL, TYPING_REPLY, TYPING_CHOICE, TYPING_CONFIRMATION = range(6)
 
 
 # TODO: proper logging
@@ -28,16 +27,16 @@ configure_markup = ReplyKeyboardMarkup(configure_keyboard, one_time_keyboard=Tru
 confirmation_keyboard = [['Yes', 'No']]
 confirmation_markup = ReplyKeyboardMarkup(confirmation_keyboard, one_time_keyboard=True)
 
+# TODO: dynamic keyboard so that user instead of typing server name can simply tap on the button
 choose_server_keyboard = [['Pick a server']]
 choose_server_markup = ReplyKeyboardMarkup(choose_server_keyboard, one_time_keyboard=True)
 
 api_calls_keyboard = [['Start all', 'Stop all', 'Get status'],
                       ['Start KMD', 'Stop KMD', 'Available tickers'],
-                      ['Change server', 'Server info', 'Get launch params']]
+                      ['Change server', 'Server info', 'Launch params']]
 api_calls_markup = ReplyKeyboardMarkup(api_calls_keyboard, one_time_keyboard=True)
 
 
-#bot
 def main():
     bot_persistence = DictPersistence()
     updater = Updater(os.environ['SYNC_BOT_TOKEN'], persistence=bot_persistence, use_context=True)
@@ -52,24 +51,25 @@ def main():
 
             TYPING_REPLY: [MessageHandler(Filters.text, received_config_information)],
 
-            CHOOSING_SERVER: [MessageHandler(Filters.regex('^(Pick a server)$'), make_a_choice)],
+            CHOOSE_SERVER: [MessageHandler(Filters.regex('^(Pick a server)$'), make_a_choice)],
             
             TYPING_CHOICE: [MessageHandler(Filters.text, received_server_choice)],
 
-            ISSUING_API_COMMANDS: [MessageHandler(Filters.regex('^(Server info)$'), show_current_server),
-                                   MessageHandler(Filters.regex('^(Start all)$'), start_sync_all),
-                                   MessageHandler(Filters.regex('^(Start KMD)$'), start_kmd),
-                                   MessageHandler(Filters.regex('^(Stop KMD)$'), stop_kmd),
-                                   MessageHandler(Filters.regex('^(Available tickers)$'), help),
-                                   MessageHandler(Filters.document.mime_type("text/x-python"), help),
-                                   MessageHandler(Filters.document.zip, setup_binary_dragndrop),
-                                   CommandHandler('setup_binary', setup_binary),
-                                   CommandHandler('start_sync', start_sync),
-                                   MessageHandler(Filters.regex('^(Stop all)$'), stop_sync_all),
-                                   CommandHandler('stop_sync', stop_sync),
-                                   MessageHandler(Filters.regex('^(Get status)$'), get_current_sync_status),
-                                   MessageHandler(Filters.regex('^(Change server)$'), make_a_choice)],
-
+            API_CALL: [MessageHandler(Filters.regex('^(Server info)$'), show_current_server),
+                       MessageHandler(Filters.regex('^(Start all)$'), start_sync_all),
+                       MessageHandler(Filters.regex('^(Start KMD)$'), start_kmd),
+                       MessageHandler(Filters.regex('^(Stop KMD)$'), stop_kmd),
+                       MessageHandler(Filters.regex('^(Available tickers)$'), get_available_tickers),
+                       MessageHandler(Filters.regex('^(Launch params)$'), get_launch_params),
+                       MessageHandler(Filters.regex('^(Restart API)$'), restart_api),
+                       MessageHandler(Filters.regex('^(Stop all)$'), stop_sync_all), 
+                       MessageHandler(Filters.regex('^(Get status)$'), get_current_sync_status),
+                       MessageHandler(Filters.regex('^(Change server)$'), make_a_choice),
+                       MessageHandler(Filters.document.mime_type("text/x-python"), help),
+                       CommandHandler('setup_binary', setup_binary),
+                       CommandHandler('start_sync', start_sync), 
+                       CommandHandler('stop_sync', stop_sync)]
+                            
             TYPING_CONFIRMATION: [MessageHandler(Filters.regex('^(Yes)$'), cleanup),
                                   MessageHandler(Filters.regex('^(No)$'), no_cleanup)],
         },
@@ -77,7 +77,6 @@ def main():
         fallbacks=[CommandHandler('help', help),
                    CommandHandler('start', start)]
     )
-
     dp.add_handler(conv_handler)
     dp.add_error_handler(error)
     updater.start_polling()
@@ -94,7 +93,6 @@ def send_typing_action(func):
         return func(update, context,  *args, **kwargs)
 
     return command_func
-
 
 
 @send_typing_action
@@ -114,27 +112,9 @@ def start(update, context):
 def received_config_information(update, context):
     name, ip, rootpass = update.message.text.split(",")
     context.user_data['new_server'] = {'name' : name, 'ip' : ip, 'pass' : rootpass}
-
     update.message.reply_text("Neat! Now press Done to start the setup.", reply_markup=configure_markup)
 
-
     return CONFIGURE
-
-
-#TYPING_CHOICE
-@send_typing_action
-def received_server_choice(update, context):
-    available_servers = context.user_data['servers']
-    for server in available_servers:
-        if update.message.text in server['name']:
-            context.user_data['current_server'] = server
-            update.message.reply_text('Now you are in the api state, here you should setup a binary first. \nUse: /setup_binary [link_to_a_downloadable_binaries_in.zip]', reply_markup=api_calls_markup)
-            return ISSUING_API_COMMANDS
-
-
-    update.message.reply_text('Something might be wrong, are you sure you typed the name of the server correctly? try again', reply_markup=choose_server_markup)
-    return CHOOSING_SERVER
-
 
 
 # TODO: end-to-end test to check if the daemon is able to start.
@@ -149,25 +129,41 @@ def configure(update, context):
     if "Hi" in r['message']:
         update.message.reply_text("Seems like setup is already done on this server. Now you should pick a server.", reply_markup=choose_server_markup)
         context.user_data['servers'].append(new_server)
-        return CHOOSING_SERVER
+        return CHOOSE_SERVER
 
-    update.message.reply_text("Starting server setup, it will take a few minutes...")
+    update.message.reply_text("Starting fresh server setup, it will take a few minutes...")
     command = "wget https://raw.githubusercontent.com/dathbezumniy/kmd-sync-api/master/sync_api_setup.sh " \
               "&& chmod u+x sync_api_setup.sh && ./sync_api_setup.sh"
     client = SSHClient(ip, user='root', password=rootpass)
     output = client.run_command(command, sudo=True)
 
-    time.sleep(200)
+    time.sleep(160)
 
     r = requests.get('http://{}'.format(ip)).json()
     if "Hi" in r['message']:
-        update.message.reply_text("Seems like setup is done. Now you should pick a server.", reply_markup=choose_server_markup)
+        update.message.reply_text("Seems like setup is done and API is up. Now you should pick a server.", reply_markup=choose_server_markup)
         context.user_data['servers'].append(new_server)
-        return CHOOSING_SERVER
+        return CHOOSE_SERVER
     
     
     update.message.reply_text("Something went wrong. API didn't start, you can try to start over the configuration with /start")
     return CONFIGURE
+
+
+
+#TYPING_CHOICE
+@send_typing_action
+def received_server_choice(update, context):
+    available_servers = context.user_data['servers']
+    for server in available_servers:
+        if update.message.text in server['name']:
+            context.user_data['current_server'] = server
+            update.message.reply_text('Now you are in the api state, here you should setup a binary first. \nUse: /setup_binary [link_to_a_downloadable_binaries_in.zip]', reply_markup=api_calls_markup)
+            return API_CALL
+
+
+    update.message.reply_text('Something might be wrong, are you sure you typed the name of the server correctly? try again', reply_markup=choose_server_markup)
+    return CHOOSE_SERVER
 
 
 @send_typing_action
@@ -177,7 +173,7 @@ def make_a_choice(update, context):
     if number_of_servers == 1:
         update.message.reply_text('Currently you have registered only one server. I\'m gonna pick it for you. Now you are in the API state, here you should setup a binary first.\nUse /setup_binary [link-to-a-downloadable-binaries-in.zip] \nor drag and drop binaries.zip in this chat.', reply_markup=api_calls_markup)
         context.user_data['current_server'] = available_servers[0]
-        return ISSUING_API_COMMANDS
+        return API_CALL
 
     elif number_of_servers > 1:
         update.message.reply_text('To pick a server just reply with a name. Currently you registered {} servers. Here they are:'.format(number_of_servers))
@@ -192,9 +188,7 @@ def make_a_choice(update, context):
     return CONFIGURE
 
 
-
 #### API CALLS
-
 #BINARIES
 @send_typing_action
 def setup_binary(update, context):
@@ -202,16 +196,7 @@ def setup_binary(update, context):
     msg = requests.post('http://{}/upload_binary'.format(context.user_data['current_server']['ip']), data=link).json()
     update.message.reply_text(msg, reply_markup=api_calls_markup)
 
-    return ISSUING_API_COMMANDS
-
-
-@send_typing_action
-def setup_binary_dragndrop(update, context):
-    link = {'link': 'drag'}
-    msg = requests.post('http://{}/upload_binary_dragndrop'.format(context.user_data['current_server']['ip']), data=link).json()
-    update.message.reply_text(msg, reply_markup=api_calls_markup)
-    
-    return ISSUING_API_COMMANDS
+    return API_CALL
 
 
 # STATUS
@@ -242,12 +227,12 @@ def get_current_sync_status(update, context):
     update.message.reply_text(reply, reply_markup=api_calls_markup, parse_mode=ParseMode.HTML)
 
 
-    return ISSUING_API_COMMANDS
-
+    return API_CALL
 
 
 def zero_division_fix(blocks, longestchain):
     return blocks / longestchain if longestchain else 0
+
 
 
 #START/STOP
@@ -257,7 +242,7 @@ def start_sync(update, context):
         msg = requests.get('http://{}/sync_start/{}'.format(context.user_data['current_server']['ip'], ticker)).json()
         update.message.reply_text(msg, reply_markup=api_calls_markup)
 
-    return ISSUING_API_COMMANDS
+    return API_CALL
 
 
 @send_typing_action
@@ -275,7 +260,7 @@ def start_kmd(update, context):
     update.message.reply_text(msg)
     update.message.reply_text('It might take a few minutes for it to appear in Get status.', reply_markup=api_calls_markup)
     context.user_data['KMD'] = 0 #not ready for cleanup
-    return ISSUING_API_COMMANDS
+    return API_CALL
 
 
 @send_typing_action
@@ -298,7 +283,7 @@ def start_sync_all(update, context):
     msg = requests.get('http://{}/sync_start_all'.format(context.user_data['current_server']['ip'])).json()
     update.message.reply_text(msg, reply_markup=api_calls_markup)
 
-    return ISSUING_API_COMMANDS
+    return API_CALL
 
 
 @send_typing_action
@@ -320,20 +305,20 @@ def cleanup(update, context):
         update.message.reply_text(msg)
         time.sleep(2)
         update.message.reply_text("Finished clean up of KMD. Fresh start, sir.", reply_markup=api_calls_markup)
-        return ISSUING_API_COMMANDS
+        return API_CALL
     
     msg = requests.get('http://{}/clean_assetchain_folders'.format(context.user_data['current_server']['ip'])).json()
     update.message.reply_text(msg)
     time.sleep(2)
     update.message.reply_text("Finished clean up. Fresh start, sir.", reply_markup=api_calls_markup)
-    return ISSUING_API_COMMANDS
+    return API_CALL
 
 
 @send_typing_action
 def no_cleanup(update, context):
     update.message.reply_text("Very well, sir. No cleanup for you.", reply_markup=api_calls_markup)
 
-    return ISSUING_API_COMMANDS
+    return API_CALL
 
 
 @send_typing_action
@@ -344,24 +329,24 @@ def show_current_server(update, context):
     msg = 'Currently you are on {}, --> {}'.format(name, ip)
     update.message.reply_text(msg, reply_markup=api_calls_markup)
 
-    return ISSUING_API_COMMANDS
+    return API_CALL
 
 
 
 @send_typing_action
 def help(update, context):
     """Send a message when the command /help is issued."""
-    help_msg = 'There are 3 main states in this bot:\n'
-    help_msg += '---> CONFIGURATION_STATE\n'
-    help_msg += '---> PICK_SERVER_STATE\n'
-    help_msg += '---> API_CALL_STATE\n'
+    help_msg =  'This bot has 3 main states:\n'
+    help_msg += '-----> CONFIGURATION_STATE\n'
+    help_msg += '-----> PICK_SERVER_STATE\n'
+    help_msg += '-----> API_CALL_STATE\n'
     help_msg += '           \n'
     help_msg += 'Commands that are accessible throughout all states:\n'
     help_msg += '/start - sets up a new server.\n'
     help_msg += '/help - prints this message.\n'
     help_msg += '           \n'
-    help_msg += 'CONFIGURATION_STATE:\n'
-    help_msg += 'You can trigger that state with /start from any bot state\n'
+    help_msg += 'CONFIGURE_STATE:\n'
+    help_msg += 'You can trigger that state with /start\n'
     help_msg += 'After you have provided data in the following format (server_name,ip,rootpass), simply press done and bot will start installation on a new server.\n'
     help_msg += 'It usually takes 2-3 minutes for bot to install all dependencies and start API.\n'
     help_msg += 'If you\'ve provided server ip with already running API, bot will skip installation and forward you to PICK_SERVER_STATE.\n'
@@ -372,14 +357,14 @@ def help(update, context):
     help_msg += 'API_CALL_STATE:\n'
     help_msg += 'You will be able to see all available commands on the keyboard. Other than the keyboard commands there are few others:\n'
     help_msg += '/start_sync AXO BET PANGEA - start tickers individually.\n'
-    help_msg += '/stop_sync AXO BET PANGEA - stop tickers individually with optional cleanup.\n'
+    help_msg += ' /stop_sync AXO BET PANGEA - stop tickers individually with optional cleanup.\n'
 
     update.message.reply_text(help_msg)
 
 
 def error(update, context):
     """Log Errors caused by Updates."""
-    logger.warning('Update "%s" caused error "%s"', update, context.error)
+    logger.warning('Update "%s" caused error "%s"\n', update, context.error)
 
 
 if __name__ == '__main__':

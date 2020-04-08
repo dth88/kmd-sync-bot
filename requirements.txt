@@ -1,0 +1,5 @@
+python-telegram-bot==12.4.2
+parallel-ssh==1.9.1
+emoji==0.5.4
+requests==2.18.4
+supervisor==4.1.0
