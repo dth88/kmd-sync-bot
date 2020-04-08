@@ -23,9 +23,8 @@ This bot and complementary sync api are in the very early development stage, so 
 For now both bot and api tested only on: Ubuntu 18.04 LTS bionic
 
 ## Installation
-I've configured both sync-bot(current-repo) and sync-api(https://github.com/dathbezumniy/kmd-sync-api) to work with supervisor, so basically you just need to do the following:
 
-If you are on a fresh server then do these preparations as well:
+If you are on a fresh server then do these preparations:
 
 ```sh
 sudo apt-get -y update
@@ -36,6 +35,7 @@ pip3 install setuptools
 pip3 install wheel
 ```
 
+I've configured both sync-bot(current-repo) and sync-api(https://github.com/dathbezumniy/kmd-sync-api) to work with supervisor, so basically you just need to do the following:
 
 ```sh    
 
@@ -56,9 +56,10 @@ Check if supervisord and sync-bot started properly:
 ps aux | grep python 
 ```
 If by any chance you do not see something like that in the output:
+```sh
         /usr/bin/python3 /usr/local/bin/supervisord -c /root/kmd-sync-bot/supervisord.conf
         /usr/bin/python3 /root/kmd-sync-bot/bot.py
-
+```
 Then you should check supervisord or bot error log:
 
 ```sh
@@ -66,7 +67,7 @@ cat logs/sync-bot.err.log
 cat logs/supervisord.log
 ```
 
-If even supervisord didn't start correctly then start over with supervisord launch cmd.
+If even supervisord didn't start correctly then.... try to start over with supervisord launch cmd.
 ```sh
 supervisord -c /root/kmd-sync-bot/supervisord.conf
 ```
@@ -77,8 +78,8 @@ If you fixed the problem then start bot again with:
 supervisorctl start sync-bot
 ```
 
-restart - will not reload supervisor config
-update - will reload config
+restart - will not reload supervisor config.  
+update - will reload config  
 
 
 ```sh
@@ -122,8 +123,8 @@ Available keyboard:  Stop all - Stops all subchains from launch_params.py with o
                     Start KMD - Starts main chain individually.
                    Get status - Displays a table with chains that are currently syncing.           
                   Server info - Displays current server info.
-                Change server - Sends you to CHOOSE_SERVER_STATE to pick another server.
                 Launch params - Drops current launch_params.py file in chat. Edit it and drop it back.
+                Change server - Sends you to CHOOSE_SERVER_STATE to pick another server.
             Available tickers - Displays all tickers that currently available.
                   
 Other than the keyboard commands there are few others:
