@@ -5,13 +5,22 @@
 This bot will help you to manage multiple sync servers with custom binaries. Just type /start and it will guide you through the setup process.
 
 
+
+
+
+
 ...... waiting for delivery of some juicy GIFS
+
+
+
+
 
 
 
 ## Pre-phase
 This bot and complementary sync api are in the very early development stage, so the security of the whole thing is still a big question and if you notice any bugs or issues please let me know here via issues or im usually available at komodo discord channel @dth. If you need any guidance on how to add features/configure or you want to propose an improvement please do not hesitate as well. For now there's no database or serialization of any kind, so as soon as your bot reboots/restarts/crashes you will loose all your configured servers, but if you are going to setup the server that already has an api installed and running the configuration function will recognize that via simple request call to root endpoint and wont make you wait.
 
+For now both bot and api tested only on: Ubuntu 18.04 LTS bionic
 
 ## Installation
 I've configured both sync-bot(this repo) and sync-api(https://github.com/dathbezumniy/kmd-sync-api) to work with supervisor so basically you just need to do the following:
@@ -32,12 +41,19 @@ supervisord -c /root/kmd-sync-bot/supervisord.conf
 
 ## Possible manual routine:
 ```sh
-ps aux | grep python - checks if supervisor and sync-bot are running. If by any chance you do not see something like that in the output: /usr/bin/python3 /root/kmd-sync-bot/bot.py
+ps aux | grep python``` - checks if supervisor and sync-bot are running.
+If by any chance you do not see something like that in the output:
+        /usr/bin/python3 /usr/local/bin/supervisord -c /root/kmd-sync-bot/supervisord.conf
+        /usr/bin/python3 /root/kmd-sync-bot/bot.py
+
+Then you should check bot error log:
+```sh
 cat logs/sync-bot.err.log
 ```
 
-If you cant figure the problem out, do not hesitate to paste this error message to me @dth at discord komodo channel or simply open up an issue here. If you have some ideas on what
 
+
+If you cant figure the problem out, do not hesitate to paste this error message to me @dth at discord komodo channel or simply open up an issue here. If you have ideas on what should be done to make this bot even better, let me know.
 
 
 
