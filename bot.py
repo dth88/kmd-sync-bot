@@ -171,7 +171,7 @@ def make_a_choice(update, context):
     available_servers = context.user_data['servers']
     number_of_servers = len(available_servers)
     if number_of_servers == 1:
-        update.message.reply_text('Currently you have registered only one server. I\'m gonna pick it for you. Now you are in the API state, here you should setup a binary first.\nUse /setup_binary [link-to-a-downloadable-binaries-in.zip] \nor drag and drop binaries.zip in this chat.', reply_markup=api_calls_markup)
+        update.message.reply_text('Currently you have registered only one server. I\'m gonna pick it for you. Now you are in the API state, here you should setup a binary first.\nUse /setup_binary [link-to-a-downloadable-binaries-in.zip]', reply_markup=api_calls_markup)
         context.user_data['current_server'] = available_servers[0]
         return API_CALL
 
@@ -193,7 +193,7 @@ def make_a_choice(update, context):
 #BINARIES
 @send_typing_action
 def setup_binary(update, context):
-    link = {'link' : context.args}
+    link = {'link' : context.args[0]}
     msg = requests.post('http://{}/upload_binary'.format(context.user_data['current_server']['ip']), data=link).json()
     update.message.reply_text(msg, reply_markup=api_calls_markup)
 
