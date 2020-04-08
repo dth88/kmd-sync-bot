@@ -31,19 +31,21 @@ supervisord -c /root/kmd-sync-bot/supervisord.conf
 ```
 
 ## Possible manual routine:
+```sh
 ps aux | grep python - checks if supervisor and sync-bot are running. If by any chance you do not see something like that in the output: /usr/bin/python3 /root/kmd-sync-bot/bot.py
-Check error logs:
 cat logs/sync-bot.err.log
+```
+
+If you cant figure the problem out, do not hesitate to paste this error message to me @dth at discord komodo channel or simply open up an issue here. If you have some ideas on what
 
 
 
 
+## Using the bot
 
-                            ## Using the bot
-
-                        Commands that are accessible throughout all states:
-                        /start - sets up a new server.
-                        /help - prints this message.
+Commands that are accessible throughout all states:
+/start - sets up a new server.
+/help - prints this message.
 
 For the purpose of better UX we decided to go with a conversational bot with 3 main states and quite a few buttons:
 

@@ -68,7 +68,7 @@ def main():
                        MessageHandler(Filters.document.mime_type("text/x-python"), help),
                        CommandHandler('setup_binary', setup_binary),
                        CommandHandler('start_sync', start_sync), 
-                       CommandHandler('stop_sync', stop_sync)]
+                       CommandHandler('stop_sync', stop_sync)],
                             
             TYPING_CONFIRMATION: [MessageHandler(Filters.regex('^(Yes)$'), cleanup),
                                   MessageHandler(Filters.regex('^(No)$'), no_cleanup)],
