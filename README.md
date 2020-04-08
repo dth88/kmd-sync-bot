@@ -114,7 +114,8 @@ Available keyboard:   Pick a server - to list available servers.
 ```
 
 ### API_COMMANDS_STATE
-Once you enter this state, you will be prompted to /setup_binary [link-to-downloadable-binaries-in.zip] this is because basically the whole idea of the bot is to test custom binaries.  !!!>>> komodod binary should be in the root of .zip archive.<<<!!!  
+Once you enter this state, you will be prompted to /setup_binary [link-to-downloadable-binaries-in.zip] this is because basically the whole idea of the bot is to test custom binaries.&nbsp;
+!!!>>> komodod binary should be in the root of .zip archive.<<<!!!  
 This is the state where you can start/stop tickers or get a current sync status on the server.
 ```
 Available keyboard:  Stop all - Stops all subchains from launch_params.py with optional cleanup.
