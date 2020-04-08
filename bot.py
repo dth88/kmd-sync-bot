@@ -61,7 +61,7 @@ def main():
                        MessageHandler(Filters.regex('^(Stop KMD)$'), stop_kmd),
                        MessageHandler(Filters.regex('^(Available tickers)$'), get_available_tickers),
                        MessageHandler(Filters.regex('^(Launch params)$'), get_launch_params),
-                       MessageHandler(Filters.regex('^(Restart API)$'), restart_api),
+                       MessageHandler(Filters.regex('^(Restart API)$'), help),#restart_api
                        MessageHandler(Filters.regex('^(Stop all)$'), stop_sync_all), 
                        MessageHandler(Filters.regex('^(Get status)$'), get_current_sync_status),
                        MessageHandler(Filters.regex('^(Change server)$'), make_a_choice),
@@ -188,6 +188,7 @@ def make_a_choice(update, context):
     return CONFIGURE
 
 
+
 #### API CALLS
 #BINARIES
 @send_typing_action
@@ -197,6 +198,23 @@ def setup_binary(update, context):
     update.message.reply_text(msg, reply_markup=api_calls_markup)
 
     return API_CALL
+
+
+@send_typing_action
+def get_available_tickers(update, context):
+    msg = requests.get('http://{}/tickers_list'.format(context.user_data['current_server']['ip'])).json()
+    update.message.reply_text(msg, reply_markup=api_calls_markup)
+
+    return API_CALL
+
+
+@send_typing_action
+def get_launch_params(update, context):
+    msg = requests.get('http://{}/tickers_params'.format(context.user_data['current_server']['ip'])).json()
+    update.message.reply_text(msg, reply_markup=api_calls_markup)
+
+    return API_CALL
+
 
 
 # STATUS
