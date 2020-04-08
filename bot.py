@@ -193,7 +193,7 @@ def make_a_choice(update, context):
 #BINARIES
 @send_typing_action
 def setup_binary(update, context):
-    link = {'link' : context.args[0]}
+    link = {'link' : context.args}
     msg = requests.post('http://{}/upload_binary'.format(context.user_data['current_server']['ip']), data=link).json()
     update.message.reply_text(msg, reply_markup=api_calls_markup)
 
@@ -276,8 +276,9 @@ def stop_sync(update, context):
 def start_kmd(update, context):
     msg = requests.get('http://{}/sync_start/{}'.format(context.user_data['current_server']['ip'], 'KMD')).json()
     update.message.reply_text(msg)
-    update.message.reply_text('It might take a few minutes for it to appear in Get status.', reply_markup=api_calls_markup)
+    update.message.reply_text('In case of reindexing it might take a few minutes for KMD to appear in Get status.', reply_markup=api_calls_markup)
     context.user_data['KMD'] = 0 #not ready for cleanup
+
     return API_CALL
 
 
@@ -290,7 +291,6 @@ def stop_kmd(update, context):
     update.message.reply_text('Lets wait few more seconds for the daemon to stop, before the cleanup.')
     time.sleep(8)
     update.message.reply_text('Would you like to cleanup KMD sync progress?', reply_markup=confirmation_markup)
-
 
     return TYPING_CONFIRMATION
 
@@ -306,12 +306,12 @@ def start_sync_all(update, context):
 
 @send_typing_action
 def stop_sync_all(update, context):
-
     msg = requests.get('http://{}/sync_stop_all'.format(context.user_data['current_server']['ip'])).json()
     update.message.reply_text(msg)
     update.message.reply_text('Waiting 30 secs for all tickers to stop with a following clean up of assetchains folders')
     time.sleep(30)
     update.message.reply_text('All tickers have stopped. Are you sure you want to proceed(Yes/No) and delete all assetchain folders? All sync progress of subchains will be lost.', reply_markup=confirmation_markup)
+    
     return TYPING_CONFIRMATION
 
 
@@ -382,7 +382,7 @@ def help(update, context):
 
 def error(update, context):
     """Log Errors caused by Updates."""
-    logger.warning('Update "%s" caused error "%s"\n', update, context.error)
+    logger.warning('Update "{}" caused error "{}"\n\n'.format(update, context.error))
 
 
 if __name__ == '__main__':
