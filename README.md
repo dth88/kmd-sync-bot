@@ -67,7 +67,7 @@ cat logs/sync-bot.err.log
 cat logs/supervisord.log
 ```
 
-If even supervisord didn't start correctly then.... try to start over with supervisord launch cmd.
+If even supervisord didn't start correctly then.... try to start over with supervisord launch cmd, but I would recommend a fresh start if it is easily accessible.
 ```sh
 supervisord -c /root/kmd-sync-bot/supervisord.conf
 ```
@@ -96,21 +96,21 @@ If you cant figure the problem out, do not hesitate to paste this error message 
 Commands that are accessible throughout all states:
 ```
 /start - sets up a new server.
-/help - prints this message.
+/help - prints help message.
 ```
 
 For the purpose of better UX we decided to go with a conversational bot with 3 main states and quite a few buttons:
 
 ### CONFIGURE_STATE
-This state is triggered when you issue /start command, it lets you setup a new server. /start and /help cmd's are always available to you in any state.
+This state is triggered when you issue /start, it lets you setup a new server.
 ```
-Available buttons:   Done - to start the configuration with provided server data.
+Available keyboard:   Done - to start the configuration with provided server credentials.
 ```
 
 ### CHOOSE_SERVER_STATE
-This is the state where you can switch between different servers that you have setup.
+This is the state where you can switch between different servers that you have previously setup.
 ```
-Available buttons:   Pick a server - to list available servers.
+Available keyboard:   Pick a server - to list available servers.
 ```
 
 ### API_COMMANDS_STATE
@@ -124,7 +124,7 @@ Available keyboard:  Stop all - Stops all subchains from launch_params.py with o
                    Get status - Displays a table with chains that are currently syncing.           
                   Server info - Displays current server info.
                 Launch params - Drops current launch_params.py file in chat. Edit it and drop it back.
-                Change server - Sends you to CHOOSE_SERVER_STATE to pick another server.
+                Change server - Sends you to CHOOSE_SERVER_STATE to pick different server.
             Available tickers - Displays all tickers that currently available.
                   
 Other than the keyboard commands there are few others:
