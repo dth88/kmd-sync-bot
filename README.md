@@ -39,9 +39,9 @@ supervisord -c /root/kmd-sync-bot/supervisord.conf
 
 ```
 
-## Possible manual routine:
-```sh
-ps aux | grep python``` - checks if supervisor and sync-bot are running.
+## Manual routine:
+
+```sh ps aux | grep python ``` - check if supervisord and sync-bot started properly.
 If by any chance you do not see something like that in the output:
         /usr/bin/python3 /usr/local/bin/supervisord -c /root/kmd-sync-bot/supervisord.conf
         /usr/bin/python3 /root/kmd-sync-bot/bot.py
@@ -49,6 +49,18 @@ If by any chance you do not see something like that in the output:
 Then you should check bot error log:
 ```sh
 cat logs/sync-bot.err.log
+```
+
+If you fixed the problem then start bot again with:
+
+```sh
+supervisorctl start sync-bot
+```
+
+```sh
+supervisorctl stop sync-bot
+supervisorctl restart sync-bot
+supervisorctl update sync-bot
 ```
 
 
@@ -76,13 +88,13 @@ Available buttons:   Pick a server - to list available servers.
 
 
 ### API_COMMANDS_STATE
+Once you enter this state, you will be prompted to /setup_binary [link-to-downloadable-binaries-in.zip] this is because basically the whole idea of the bot is to test custom binaries.
 This is the state where you can start/stop tickers or get a current sync status on the server.
 Available keyboard:  Stop all - Stops all subchains from launch_params.py with optional cleanup.
                      Stop KMD - Stops main chain individually with optional cleanup.
                     Start all - Starts all subchains from launch_params.py
                     Start KMD - Starts main chain individually.
-                   Get status - Displays a table with chains that are currently syncing.
-                  Restart API - Triggers automatically when you upload new launch_params.py in chat.             
+                   Get status - Displays a table with chains that are currently syncing.           
                   Server info - Displays current server info.
                 Change server - Sends you to CHOOSE_SERVER_STATE to pick another server.
                 Launch params - Drops current launch_params.py file in chat. Edit it and drop it back.
@@ -90,6 +102,7 @@ Available keyboard:  Stop all - Stops all subchains from launch_params.py with o
                   
 Other than the keyboard commands there are few others:
 /start_sync AXO BET PANGEA - start tickers individually.
- /stop_sync AXO BET PANGEA - stop tickers individually with optional cleanup.
+ /stop_sync AXO BET PANGEA -  stop tickers individually with optional cleanup.
+
 
 
