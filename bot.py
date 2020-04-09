@@ -6,6 +6,7 @@ import requests
 from emoji import emojize
 from functools import wraps
 from pssh.clients import SSHClient
+from pssh.exceptions import AuthenticationException
 from telegram import ReplyKeyboardMarkup, ChatAction, ParseMode
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
                           ConversationHandler, DictPersistence)
@@ -131,19 +132,18 @@ def configure(update, context):
             update.message.reply_text("Seems like setup is already done on this server. Now you should pick a server.", reply_markup=choose_server_markup)
             context.user_data['servers'].append(new_server)
             return CHOOSE_SERVER
-    except ConnectionError:
+    except requests.exceptions.RequestException:
         pass
     
     #check if auth is correct
-    client = SSHClient(ip, user='root', password=rootpass)
-    client.run_command('whoami', sudo=True)
-    output = client.get_last_output()
-
-    if 'root' in output.stdout:
+    try:
+        client = SSHClient(ip, user='root', password=rootpass)
+        client.run_command('whoami', sudo=True)
         update.message.reply_text("Auth credentials ok.")
-    else:
+    except AuthenticationException:
         update.message.reply_text("Auth credentials fail. Start-over with /start")
         return CONFIGURE
+        
 
     update.message.reply_text("Starting fresh server setup, it will take a few minutes...")
     command = "wget https://raw.githubusercontent.com/dathbezumniy/kmd-sync-api/master/sync_api_setup.sh " \
