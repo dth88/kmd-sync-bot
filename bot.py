@@ -7,6 +7,7 @@ from emoji import emojize
 from functools import wraps
 from pssh.clients import SSHClient
 from pssh.exceptions import AuthenticationException
+from requests.exceptions import RequestException
 from telegram import ReplyKeyboardMarkup, ChatAction, ParseMode
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
                           ConversationHandler, DictPersistence)
@@ -126,13 +127,14 @@ def configure(update, context):
     ip = new_server['ip']
     rootpass = new_server['pass']
 
+    #check if there's already API running on the server
     try:
         r = requests.get('http://{}'.format(ip)).json()
         if "Hi" in r['message']:
             update.message.reply_text("Seems like setup is already done on this server. Now you should pick a server.", reply_markup=choose_server_markup)
             context.user_data['servers'].append(new_server)
             return CHOOSE_SERVER
-    except requests.exceptions.RequestException:
+    except RequestException:
         pass
     
     #check if auth is correct
@@ -143,26 +145,30 @@ def configure(update, context):
     except AuthenticationException:
         update.message.reply_text("Auth credentials fail. Start-over with /start")
         return CONFIGURE
-        
+
 
     update.message.reply_text("Starting fresh server setup, it will take a few minutes...")
     command = "wget https://raw.githubusercontent.com/dathbezumniy/kmd-sync-api/master/sync_api_setup.sh " \
               "&& chmod u+x sync_api_setup.sh && ./sync_api_setup.sh"
     output = client.run_command(command, sudo=True)
 
-    time.sleep(160)
-
+    #wait until all dependencies downloaded/installed then check if API is up
+    time.sleep(200)
     try:
-
         r = requests.get('http://{}'.format(ip)).json()
         if "Hi" in r['message']:
             update.message.reply_text("Seems like setup is done and API is up. Now you should pick a server.", reply_markup=choose_server_markup)
             context.user_data['servers'].append(new_server)
             return CHOOSE_SERVER
-    except ConnectionRefusedError:
-        pass
+    except RequestException:
+        update.message.reply_text("Something went wrong. API didn't start, you can try to start over the configuration with /start")
+        return CONFIGURE
+    
     update.message.reply_text("Something went wrong. API didn't start, you can try to start over the configuration with /start")
     return CONFIGURE
+
+
+    
 
 
 
