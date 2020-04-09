@@ -106,6 +106,7 @@ def start(update, context):
     except KeyError:
         context.user_data['servers'] = []
     context.user_data['new_server'] = {}
+    context.user_data['KMD'] = 0 #not ready for cleanup
 
     return TYPING_REPLY
 
@@ -170,8 +171,6 @@ def configure(update, context):
 
     
 
-
-
 #TYPING_CHOICE
 @send_typing_action
 def received_server_choice(update, context):
@@ -210,8 +209,9 @@ def make_a_choice(update, context):
 
 
 
-#### API CALLS
-#BINARIES
+#   API CALLS
+
+
 @send_typing_action
 def setup_binary(update, context):
     link = {'link' : context.args[0]}
