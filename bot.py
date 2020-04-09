@@ -131,7 +131,7 @@ def configure(update, context):
             update.message.reply_text("Seems like setup is already done on this server. Now you should pick a server.", reply_markup=choose_server_markup)
             context.user_data['servers'].append(new_server)
             return CHOOSE_SERVER
-    except ConnectionRefusedError:
+    except ConnectionError:
         pass
     
     #check if auth is correct
