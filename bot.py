@@ -160,7 +160,7 @@ def configure(update, context):
             context.user_data['servers'].append(new_server)
             return CHOOSE_SERVER
     except ConnectionRefusedError:
-    
+        pass
     update.message.reply_text("Something went wrong. API didn't start, you can try to start over the configuration with /start")
     return CONFIGURE
 
