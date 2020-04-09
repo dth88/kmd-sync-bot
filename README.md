@@ -55,40 +55,23 @@ Check if supervisord and sync-bot started properly:
 ```sh 
 ps aux | grep python 
 ```
-If by any chance you do not see something like that in the output:
-```sh
-        /usr/bin/python3 /usr/local/bin/supervisord -c /root/kmd-sync-bot/supervisord.conf
-        /usr/bin/python3 /root/kmd-sync-bot/bot.py
-```
-Then you should check supervisord or bot error log:
+
+If you do not see bot.py running then you should check supervisord or bot error log:
 
 ```sh
 cat logs/sync-bot.err.log
 cat logs/supervisord.log
 ```
 
-If even supervisord didn't start correctly then.... try to start over with supervisord launch cmd, but I would recommend a fresh start if it is easily accessible.
-```sh
-supervisord -c /root/kmd-sync-bot/supervisord.conf
-```
-
 If you fixed the problem then start bot again with:
 
 ```sh
 supervisorctl start sync-bot
-```
-
-restart - will not reload supervisor config.  
-update - will reload config  
-
-
-```sh
 supervisorctl stop sync-bot
 supervisorctl restart sync-bot
-supervisorctl update sync-bot
 ```
 
-If you cant figure the problem out, do not hesitate to paste this error message to me @dth on discord komodo channel or simply open up an issue here. If you have ideas on what should be done to make this bot even better, let me know.
+If you cant figure the problem out, do not hesitate to paste this error message to me @dth on discord komodo channel or simply open up an issue here. If you have any ideas on what should be done to make this bot even better, let me know.
 
 
 ## Using the bot
