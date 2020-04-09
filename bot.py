@@ -33,7 +33,7 @@ confirmation_markup = ReplyKeyboardMarkup(confirmation_keyboard, one_time_keyboa
 choose_server_keyboard = [['Pick a server']]
 choose_server_markup = ReplyKeyboardMarkup(choose_server_keyboard, one_time_keyboard=True)
 
-api_calls_keyboard = [['Start all', 'Stop all', 'Get status'],
+api_calls_keyboard = [['Start all ACs', 'Stop all ACs', 'Get status'],
                       ['Start KMD', 'Stop KMD', 'Available tickers'],
                       ['Change server', 'Server info', 'Launch params']]
 api_calls_markup = ReplyKeyboardMarkup(api_calls_keyboard, one_time_keyboard=True)
@@ -58,13 +58,13 @@ def main():
             TYPING_CHOICE: [MessageHandler(Filters.text, received_server_choice)],
 
             API_CALL: [MessageHandler(Filters.regex('^(Server info)$'), show_current_server),
-                       MessageHandler(Filters.regex('^(Start all)$'), start_sync_all),
+                       MessageHandler(Filters.regex('^(Start all ACs)$'), start_sync_all),
                        MessageHandler(Filters.regex('^(Start KMD)$'), start_kmd),
                        MessageHandler(Filters.regex('^(Stop KMD)$'), stop_kmd),
                        MessageHandler(Filters.regex('^(Available tickers)$'), get_available_tickers),
                        MessageHandler(Filters.regex('^(Launch params)$'), get_launch_params),
                        MessageHandler(Filters.regex('^(Restart API)$'), help),#restart_api
-                       MessageHandler(Filters.regex('^(Stop all)$'), stop_sync_all), 
+                       MessageHandler(Filters.regex('^(Stop all ACs)$'), stop_sync_all), 
                        MessageHandler(Filters.regex('^(Get status)$'), get_current_sync_status),
                        MessageHandler(Filters.regex('^(Change server)$'), make_a_choice),
                        MessageHandler(Filters.document.mime_type("text/x-python"), help),
