@@ -125,26 +125,41 @@ def configure(update, context):
     ip = new_server['ip']
     rootpass = new_server['pass']
 
-    r = requests.get('http://{}'.format(ip)).json()
-    if "Hi" in r['message']:
-        update.message.reply_text("Seems like setup is already done on this server. Now you should pick a server.", reply_markup=choose_server_markup)
-        context.user_data['servers'].append(new_server)
-        return CHOOSE_SERVER
+    try:
+        r = requests.get('http://{}'.format(ip)).json()
+        if "Hi" in r['message']:
+            update.message.reply_text("Seems like setup is already done on this server. Now you should pick a server.", reply_markup=choose_server_markup)
+            context.user_data['servers'].append(new_server)
+            return CHOOSE_SERVER
+    except ConnectionRefusedError:
+        pass
+    
+    #check if auth is correct
+    client = SSHClient(ip, user='root', password=rootpass)
+    client.run_command('whoami', sudo=True)
+    output = client.get_last_output()
+
+    if 'root' in output.stdout:
+        update.message.reply_text("Auth credentials ok.")
+    else:
+        update.message.reply_text("Auth credentials fail. Start-over with /start")
+        return CONFIGURE
 
     update.message.reply_text("Starting fresh server setup, it will take a few minutes...")
     command = "wget https://raw.githubusercontent.com/dathbezumniy/kmd-sync-api/master/sync_api_setup.sh " \
               "&& chmod u+x sync_api_setup.sh && ./sync_api_setup.sh"
-    client = SSHClient(ip, user='root', password=rootpass)
     output = client.run_command(command, sudo=True)
 
     time.sleep(160)
 
-    r = requests.get('http://{}'.format(ip)).json()
-    if "Hi" in r['message']:
-        update.message.reply_text("Seems like setup is done and API is up. Now you should pick a server.", reply_markup=choose_server_markup)
-        context.user_data['servers'].append(new_server)
-        return CHOOSE_SERVER
-    
+    try:
+
+        r = requests.get('http://{}'.format(ip)).json()
+        if "Hi" in r['message']:
+            update.message.reply_text("Seems like setup is done and API is up. Now you should pick a server.", reply_markup=choose_server_markup)
+            context.user_data['servers'].append(new_server)
+            return CHOOSE_SERVER
+    except ConnectionRefusedError:
     
     update.message.reply_text("Something went wrong. API didn't start, you can try to start over the configuration with /start")
     return CONFIGURE
