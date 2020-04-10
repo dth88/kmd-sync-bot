@@ -348,6 +348,7 @@ def cleanup(update, context):
         update.message.reply_text(msg)
         time.sleep(2)
         update.message.reply_text("Finished clean up of KMD. Fresh start, sir.", reply_markup=api_calls_markup)
+        context.user_data['KMD'] = 0 #not ready for cleanup
         return API_CALL
     
     msg = requests.get('http://{}/clean_assetchain_folders'.format(context.user_data['current_server']['ip'])).json()
