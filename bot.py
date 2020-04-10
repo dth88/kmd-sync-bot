@@ -62,14 +62,14 @@ def main():
                        MessageHandler(Filters.regex('^(Start KMD)$'), start_kmd),
                        MessageHandler(Filters.regex('^(Stop KMD)$'), stop_kmd),
                        MessageHandler(Filters.regex('^(Available tickers)$'), get_available_tickers),
-                       MessageHandler(Filters.regex('^(Launch params)$'), get_launch_params),
-                       MessageHandler(Filters.regex('^(Restart API)$'), help),#restart_api
-                       MessageHandler(Filters.regex('^(Stop all ACs)$'), stop_sync_all), 
+                       MessageHandler(Filters.regex('^(Launch params)$'), dummy_func),
+                       MessageHandler(Filters.regex('^(Restart API)$'), dummy_func),
+                       MessageHandler(Filters.regex('^(Stop all ACs)$'), stop_sync_all),
                        MessageHandler(Filters.regex('^(Get status)$'), get_current_sync_status),
                        MessageHandler(Filters.regex('^(Change server)$'), make_a_choice),
-                       MessageHandler(Filters.document.mime_type("text/x-python"), help),
+                       MessageHandler(Filters.document.mime_type("text/x-python"), dummy_func),
                        CommandHandler('setup_binary', setup_binary),
-                       CommandHandler('start_sync', start_sync), 
+                       CommandHandler('start_sync', start_sync),
                        CommandHandler('stop_sync', stop_sync)],
                             
             TYPING_CONFIRMATION: [MessageHandler(Filters.regex('^(Yes)$'), cleanup),
@@ -95,6 +95,10 @@ def send_typing_action(func):
         return func(update, context,  *args, **kwargs)
 
     return command_func
+
+
+def dummy_func():
+    update.message.reply_text('this function is in development')
 
 
 @send_typing_action
@@ -209,7 +213,7 @@ def make_a_choice(update, context):
 
 
 
-#   API CALLS
+#### API CALLS
 
 
 @send_typing_action
