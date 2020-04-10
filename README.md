@@ -18,7 +18,7 @@ This bot will help you to manage multiple sync servers with custom binaries. Jus
 
 
 ## Pre-phase
-This bot and complementary sync api are in the very early development stage, so the security of the whole thing is still a big question and if you notice any bugs or issues please let me know here via issues or at komodo discord channel @dth. If you need any guidance on how to add features/configure or you want to propose an improvement please do not hesitate. For now there's no database or serialization of any kind, so as soon as your bot reboots/restarts/crashes you will loose all your configured servers, but if you are going to setup the server that already has an api installed and running the configuration function will recognize that via simple request call to root endpoint and wont make you wait. Another important remark would be that we have not implemented much of foolproofing, so bot may be fragile to inputs and overall sloppy usage.
+This bot and complementary sync api are in the very early development stages, so the security of the whole thing is still a big question, to be completely honest its not a question, there's basically no security at all, any person who knows your sync-api server ip address can call endpoints just as bot does. If you need any guidance on how to add features/configure or you want to propose an improvement please do not hesitate to contact me on komodo discord @dth. For now there's no database or serialization of any kind, so as soon as your bot reboots/restarts/crashes you will loose all your configured servers, but if you are going to setup the server that already has an api installed and running the configuration function will recognize that via simple call to root endpoint and wont make you wait. Another important remark would be that we have not implemented much of foolproofing, so bot may be fragile to inputs and overall sloppy usage.
 
 For now both bot and api tested only on: Ubuntu 18.04 LTS bionic
 
@@ -35,7 +35,7 @@ pip3 install setuptools
 pip3 install wheel
 ```
 
-I've configured both sync-bot(current-repo) and sync-api(https://github.com/dathbezumniy/kmd-sync-api) to work with supervisor, so basically you just need to do the following:
+I've configured both sync-bot(current-repo) and sync-api(https://github.com/dathbezumniy/kmd-sync-api) to work with supervisor, so you just need to do the following:
 
 ```sh    
 
