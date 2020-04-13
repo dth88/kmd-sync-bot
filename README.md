@@ -117,5 +117,5 @@ Available keyboard:
                   
 Other than the keyboard commands there are few others:
 /start_sync AXO BET PANGEA - start tickers individually.
- /stop_sync AXO -  stop tickers individually with optional cleanup.
+/stop_sync AXO - stop tickers individually with optional cleanup.
 ```
