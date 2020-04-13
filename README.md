@@ -99,7 +99,7 @@ Available keyboard:   Pick a server - to list available servers.
 ### API_COMMANDS_STATE
 Once you enter this state, you will be prompted to /setup_binary [link-to-downloadable-binaries-in.zip]
 
-!!! komodod binary should be in the root of .zip archive.  
+!!! komodod and komodo-cli binaries should be in the root of .zip archive.  
 
 This is the state where you can start/stop tickers or get a current sync status on the server.
 
