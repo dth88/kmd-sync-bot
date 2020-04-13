@@ -97,8 +97,13 @@ def send_typing_action(func):
     return command_func
 
 
+
+@send_typing_action
 def dummy_func():
-    update.message.reply_text('this function is in development')
+    update.message.reply_text('this function is in development', reply_markup=api_calls_markup)
+
+
+    return API_CALL
 
 
 @send_typing_action
