@@ -184,17 +184,11 @@ def configure(update, context):
 @send_typing_action
 def received_server_choice(update, context):
     available_servers = context.user_data['servers']
-    is_server_found = False
     for server in available_servers:
         if update.message.text == server['name']:
             context.user_data['current_server'] = server
-            is_server_found = True
             update.message.reply_text('Now you are in the api state, here you should setup a binary first. \nUse: /setup_binary [link_to_a_downloadable_binaries_in.zip]', reply_markup=api_calls_markup)
             return API_CALL
-    if not is_server_found:
-        update.message.reply_text('Cant find server name. Please check your input.', reply_markup=api_calls_markup)
-        return API_CALL
-
 
     update.message.reply_text('Something might be wrong, are you sure you typed the name of the server correctly? try again', reply_markup=choose_server_markup)
     return CHOOSE_SERVER
