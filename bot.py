@@ -185,11 +185,10 @@ def configure(update, context):
 def received_server_choice(update, context):
     available_servers = context.user_data['servers']
     for server in available_servers:
-        if update.message.text in server['name']:
+        if update.message.text == server['name']:
             context.user_data['current_server'] = server
             update.message.reply_text('Now you are in the api state, here you should setup a binary first. \nUse: /setup_binary [link_to_a_downloadable_binaries_in.zip]', reply_markup=api_calls_markup)
             return API_CALL
-
 
     update.message.reply_text('Something might be wrong, are you sure you typed the name of the server correctly? try again', reply_markup=choose_server_markup)
     return CHOOSE_SERVER
