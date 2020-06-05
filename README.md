@@ -18,7 +18,7 @@ This bot will help you to manage multiple sync servers with custom binaries. Jus
 
 
 ## Preface
-(SECURITY ALERT) This bot and complementary sync-api(https://github.com/dathbezumniy/kmd-sync-api) are in the very early development stages, so there's basically no security at all, any person who knows your sync-api server ip address can call endpoints just as bot does. If you need any guidance on how to add features/configure or you want to propose an improvement please do not hesitate to contact me on komodo discord @dth. For now there's no database or serialization of any kind, so as soon as your bot reboots/restarts/crashes you will loose all your configured servers, but if you are going to setup the server that already has an api installed and running the configuration function will recognize that via simple call to root endpoint and wont make you wait. Another important remark would be that we have not implemented much of foolproofing, so bot may be fragile to inputs and overall sloppy usage.
+(SECURITY ALERT) This bot and complementary sync-api(https://github.com/dathbezumniy/kmd-sync-api) are in the very early development stages, so there's basically no security at all, any person who knows your sync-api server ip address can call endpoints just as bot does. If you need any guidance on how to add features/configure or you want to propose an improvement please do not hesitate to contact me on komodo discord dth#2674. For now there's no database or serialization of any kind, so as soon as your bot reboots/restarts/crashes you will loose all your configured servers, but if you are going to setup the server that already has an api installed and running the configuration function will recognize that via simple call to root endpoint and wont make you wait. Another important remark would be that we have not implemented much of foolproofing, so bot may be fragile to inputs and overall sloppy usage.
 
 For now both bot and api tested only on: Ubuntu 18.04 LTS bionic
 
@@ -71,7 +71,7 @@ supervisorctl stop sync-bot
 supervisorctl restart sync-bot
 ```
 
-If you cant figure the problem out, do not hesitate to paste this error message to me @dth on komodo discord or simply open up an issue here.
+If you cant figure the problem out, do not hesitate to paste this error message to me dth#2674 on komodo discord or simply open up an issue here.
 
 
 ## Using the bot
