@@ -11,7 +11,7 @@ This bot will help you to manage multiple sync servers with custom binaries. Jus
 
 ![3](https://i.ibb.co/thM0fF1/start-sync.png)
 
-![4](https://i.ibb.co/x6Mmsyz/finish-sync.png)
+![4](https://i.ibb.co/rc9sxWC/finish-sync.png)
 
 ![5](https://i.ibb.co/w7f2GTs/available.png)
 
