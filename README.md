@@ -6,11 +6,20 @@ This bot will help you to manage multiple sync servers with custom binaries. Jus
 
 
 ![1](https://i.ibb.co/yPm60zJ/start.png)
-![2](https://i.ibb.co/thM0fF1/start-sync.png)
-![3](https://i.ibb.co/x6Mmsyz/finish-sync.png)
-![4](https://i.ibb.co/w7f2GTs/available.png)
-![5](https://i.ibb.co/tMVrntz/change-server.png)
-![6](https://i.ibb.co/zHLTpNB/edit.png)
+
+![2](https://i.ibb.co/yXqgR5k/binary-setup.png)
+
+![3](https://i.ibb.co/thM0fF1/start-sync.png)
+
+![4](https://i.ibb.co/x6Mmsyz/finish-sync.png)
+
+![5](https://i.ibb.co/w7f2GTs/available.png)
+
+![6](https://i.ibb.co/tMVrntz/change-server.png)
+
+![7](https://i.ibb.co/SPbkSxw/stop-sync.png)
+
+![8](https://i.ibb.co/zHLTpNB/help.png)
 
 
 
