@@ -106,15 +106,15 @@ This is the state where you can start/stop tickers or get a current sync status 
 
 ```
 Available keyboard:  
-                     Stop KMD - Stops main chain individually with optional cleanup.
-                    Start KMD - Starts main chain individually.
-                   Get status - Displays a table with chains that are currently syncing.           
-                  Server info - Displays current server info.
-                 Stop all ACs - Stops all subchains from launch_params.py with optional cleanup.
-                Start all ACs - Starts all subchains from launch_params.py
-                Launch params - Drops current launch_params.py file in chat. Edit it and drop it back.
-                Change server - Sends you to CHOOSE_SERVER_STATE to pick different server.
-            Available tickers - Displays all tickers that currently available to launch.
+           Stop KMD - Stops main chain individually with optional cleanup.
+          Start KMD - Starts main chain individually.
+         Get status - Displays a table with chains that are currently syncing.           
+        Server info - Displays current server info.
+       Stop all ACs - Stops all subchains from launch_params.py with optional cleanup.
+      Start all ACs - Starts all subchains from launch_params.py
+      Launch params - Drops current launch_params.py file in chat. Edit it and drop it back.
+      Change server - Sends you to CHOOSE_SERVER_STATE to pick different server.
+  Available tickers - Displays all tickers that currently available to launch.
                   
 Other than the keyboard commands there are few others:
 /start_sync AXO BET PANGEA - start tickers individually.
